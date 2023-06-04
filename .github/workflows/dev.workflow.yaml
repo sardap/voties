@@ -14,5 +14,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: Setup wasm-bindgen
+        uses: cargo install -f wasm-bindgen-cli
       - name: Build
-        run: cargo build
+        run: cargo build --release --target wasm32-unknown-unknown
