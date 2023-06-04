@@ -18,8 +18,12 @@ jobs:
         run: cargo install -f wasm-bindgen-cli
       - name: Build
         run: cargo build --release --target wasm32-unknown-unknown
-      - name: rename file
-        run: mv app.gba march_good_maybe.gba
+      - name: Create out folder
+        run: mkdir out
+      - name: wasm-bindgen
+        run: wasm-bindgen --typescript --out-dir ./out --target web ./target/wasm32-unknown-unknown/release/voties.wasm
+      - name: Zip output
+        run: zip -r voties_wasm.zip ./out
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -37,6 +41,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./march_good_maybe.gba
-          asset_name: march_good_maybe.gba
-          asset_content_type: application/bin
+          asset_path: ./voties_wasm.zip
+          asset_name: voties_wasm.zip
+          asset_content_type: application/zip
