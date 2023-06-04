@@ -12,10 +12,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Build image
-        run: docker build . -t gba_build:latest
-      - name: Build Rom
-        run: docker run -v ${PWD}:/app  -e OPTIMIZATION_LEVEL=O3 gba_build:latest
+      - name: Setup target
+        run: rustup target install wasm32-unknown-unknown
+      - name: Setup wasm-bindgen
+        run: cargo install -f wasm-bindgen-cli
+      - name: Build
+        run: cargo build --release --target wasm32-unknown-unknown
       - name: rename file
         run: mv app.gba march_good_maybe.gba
       - name: Create Release
