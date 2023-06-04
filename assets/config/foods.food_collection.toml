@@ -1,0 +1,1503 @@
+[[foods]]
+name = "Bread"
+kcal = 223.0
+ml = 100.0
+groups = ["Grain"]
+difficulty = 1
+
+[[foods]]
+name = "Vegemite on Toast"
+kcal = 150.0
+ml = 150.0
+groups = ["Grain", "Fat", "Vegetable"]
+difficulty = 2
+
+[[foods]]
+name = "Meat Pies"
+kcal = 400.0
+ml = 250.0
+groups = ["Grain", "Meat", "Vegetable", "Fat"]
+difficulty = 6
+
+[[foods]]
+name = "Fish and Chips"
+kcal = 800.0
+ml = 500.0
+groups = ["Meat", "Grain", "Vegetable", "Fat"]
+difficulty = 3
+
+[[foods]]
+name = "Lamingtons"
+kcal = 300.0
+ml = 75.0
+groups = ["Grain", "Sugar", "Fat", "Dairy"]
+difficulty = 5
+
+[[foods]]
+name = "Anzac Biscuits"
+kcal = 80.0
+ml = 30.0
+groups = ["Grain", "Sugar", "Fat", "Dairy"]
+difficulty = 4
+
+[[foods]]
+name = "Pavlova"
+kcal = 300.0
+ml = 125.0
+groups = ["Sugar", "Dairy", "Fruit"]
+difficulty = 7
+
+[[foods]]
+name = "Sausage Rolls"
+kcal = 250.0
+ml = 150.0
+groups = ["Grain", "Meat", "Vegetable", "Fat"]
+difficulty = 5
+
+[[foods]]
+name = "Chicken Parmigiana"
+kcal = 600.0
+ml = 350.0
+groups = ["Meat", "Grain", "Dairy", "Vegetable"]
+difficulty = 6
+
+[[foods]]
+name = "Damper"
+kcal = 200.0
+ml = 100.0
+groups = ["Grain", "Fat", "Dairy"]
+difficulty = 3
+
+[[foods]]
+name = "Prawn Cocktail"
+kcal = 200.0
+ml = 150.0
+groups = ["Meat", "Vegetable", "Sugar"]
+difficulty = 4
+
+[[foods]]
+name = "Fairy Bread"
+kcal = 150.0
+ml = 100.0
+groups = ["Grain", "Fat", "Sugar"]
+difficulty = 1
+
+[[foods]]
+name = "Kangaroo Steak"
+kcal = 150.0
+ml = 200.0
+groups = ["Meat"]
+difficulty = 7
+
+[[foods]]
+name = "Macadamia Nut Pie"
+kcal = 450.0
+ml = 150.0
+groups = ["Grain", "Fat", "Sugar", "Dairy"]
+difficulty = 6
+
+[[foods]]
+name = "Salt and Pepper Calamari"
+kcal = 300.0
+ml = 200.0
+groups = ["Meat", "Grain", "Fat"]
+difficulty = 5
+
+[[foods]]
+name = "Aussie Burger"
+kcal = 500.0
+ml = 250.0
+groups = ["Meat", "Vegetable", "Grain", "Dairy", "Fat", "Sugar"]
+difficulty = 6
+
+[[foods]]
+name = "Neenish Tart"
+kcal = 250.0
+ml = 75.0
+groups = ["Grain", "Sugar", "Dairy"]
+difficulty = 4
+
+[[foods]]
+name = "Chicken and Corn Soup"
+kcal = 250.0
+ml = 300.0
+groups = ["Meat", "Vegetable"]
+difficulty = 2
+
+[[foods]]
+name = "Vanilla Slice"
+kcal = 300.0
+ml = 150.0
+groups = ["Grain", "Sugar", "Dairy"]
+difficulty = 4
+
+[[foods]]
+name = "Salt and Pepper Prawns"
+kcal = 200.0
+ml = 100.0
+groups = ["Meat", "Fat"]
+difficulty = 3
+
+[[foods]]
+name = "Tandoori Chicken Pizza"
+kcal = 700.0
+ml = 300.0
+groups = ["Meat", "Grain", "Dairy", "Vegetable", "Fat"]
+difficulty = 5
+
+[[foods]]
+name = "김치 (Kimchi)"
+kcal = 30.0
+ml = 150.0
+groups = ["Vegetable", "Fat"]
+difficulty = 3
+
+[[foods]]
+name = "비빔밥 (Bibimbap)"
+kcal = 550.0
+ml = 500.0
+groups = ["Grain", "Vegetable", "Meat", "Fat"]
+difficulty = 5
+
+[[foods]]
+name = "불고기 (Bulgogi)"
+kcal = 300.0
+ml = 200.0
+groups = ["Meat", "Sugar", "Fat"]
+difficulty = 4
+
+[[foods]]
+name = "삼겹살 (Samgyeopsal)"
+kcal = 600.0
+ml = 350.0
+groups = ["Meat", "Vegetable", "Fat"]
+difficulty = 2
+
+[[foods]]
+name = "잡채 (Japchae)"
+kcal = 350.0
+ml = 300.0
+groups = ["Grain", "Vegetable", "Meat", "Sugar", "Fat"]
+difficulty = 6
+
+[[foods]]
+name = "떡볶이 (Tteokbokki)"
+kcal = 500.0
+ml = 300.0
+groups = ["Grain", "Meat"]
+difficulty = 4
+
+[[foods]]
+name = "김밥 (Gimbap)"
+kcal = 200.0
+ml = 300.0
+groups = ["Grain", "Meat", "Vegetable"]
+difficulty = 6
+
+[[foods]]
+name = "순두부찌개 (Sundubu-jjigae)"
+kcal = 300.0
+ml = 350.0
+groups = ["Meat", "Vegetable", "Fat"]
+difficulty = 5
+
+[[foods]]
+name = "김치찌개 (Kimchi-jjigae)"
+kcal = 200.0
+ml = 300.0
+groups = ["Meat", "Vegetable", "Fat"]
+difficulty = 5
+
+[[foods]]
+name = "된장찌개 (Doenjang-jjigae)"
+kcal = 250.0
+ml = 350.0
+groups = ["Vegetable"]
+difficulty = 4
+
+[[foods]]
+name = "갈비 (Galbi)"
+kcal = 500.0
+ml = 250.0
+groups = ["Meat", "Sugar", "Fat"]
+difficulty = 8
+
+[[foods]]
+name = "삼계탕 (Samgyetang)"
+kcal = 400.0
+ml = 400.0
+groups = ["Meat", "Grain", "Vegetable"]
+difficulty = 7
+
+[[foods]]
+name = "닭죽 (Dakjuk)"
+kcal = 200.0
+ml = 300.0
+groups = ["Meat", "Grain", "Fat"]
+difficulty = 3
+
+[[foods]]
+name = "만두 (Mandu)"
+kcal = 50.0
+ml = 50.0
+groups = ["Grain", "Meat", "Vegetable"]
+difficulty = 6
+
+[[foods]]
+name = "냉면 (Naengmyeon)"
+kcal = 275.0
+ml = 300.0
+groups = ["Grain", "Vegetable", "Fat"]
+difficulty = 5
+
+[[foods]]
+name = "설렁탕 (Seolleongtang)"
+kcal = 400.0
+ml = 400.0
+groups = ["Meat", "Grain", "Vegetable"]
+difficulty = 6
+
+[[foods]]
+name = "해물파전 (Haemul-pajeon)"
+kcal = 350.0
+ml = 250.0
+groups = ["Grain", "Meat", "Vegetable", "Fat"]
+difficulty = 7
+
+[[foods]]
+name = "보쌈 (Bossam)"
+kcal = 600.0
+ml = 350.0
+groups = ["Meat", "Vegetable", "Fat"]
+difficulty = 7
+
+[[foods]]
+name = "부대찌개 (Budae-jjigae)"
+kcal = 500.0
+ml = 500.0
+groups = ["Meat", "Grain", "Vegetable", "Fat"]
+difficulty = 8
+
+[[foods]]
+name = "호떡 (Hotteok)"
+kcal = 250.0
+ml = 150.0
+groups = ["Grain", "Sugar", "Fat"]
+difficulty = 3
+
+[[foods]]
+name = "빙수 (Bingsu)"
+kcal = 300.0
+ml = 400.0
+groups = ["Dairy", "Sugar", "Vegetable"]
+difficulty = 2
+
+[[foods]]
+name = "닭갈비 (Dakgalbi)"
+kcal = 600.0
+ml = 400.0
+groups = ["Meat", "Vegetable", "Fat"]
+difficulty = 7
+
+[[foods]]
+name = "자장면 (Jajangmyeon)"
+kcal = 700.0
+ml = 500.0
+groups = ["Grain", "Meat", "Vegetable"]
+difficulty = 5
+
+[[foods]]
+name = "순대 (Sundae)"
+kcal = 300.0
+ml = 200.0
+groups = ["Meat", "Grain"]
+difficulty = 6
+
+[[foods]]
+name = "흑당호떡 (Hoeddeok)"
+kcal = 275.0
+ml = 150.0
+groups = ["Grain", "Sugar", "Fat"]
+difficulty = 3
+
+[[foods]]
+name = "육회 (Yukhoe)"
+kcal = 400.0
+ml = 200.0
+groups = ["Meat", "Fat"]
+difficulty = 8
+
+[[foods]]
+name = "콩국수 (Kongguksu)"
+kcal = 300.0
+ml = 400.0
+groups = ["Grain", "Vegetable"]
+difficulty = 4
+
+[[foods]]
+name = "팥빙수 (Patbingsu)"
+kcal = 350.0
+ml = 400.0
+groups = ["Dairy", "Sugar", "Vegetable", "Grain"]
+difficulty = 2
+
+[[foods]]
+name = "붕어빵 (Bungeoppang)"
+kcal = 300.0
+ml = 100.0
+groups = ["Grain", "Sugar"]
+difficulty = 3
+
+[[foods]]
+name = "칼국수 (Kalguksu)"
+kcal = 550.0
+ml = 400.0
+groups = ["Grain", "Meat", "Vegetable"]
+difficulty = 6
+
+[[foods]]
+name = "육개장 (Yukgaejang)"
+kcal = 500.0
+ml = 350.0
+groups = ["Meat", "Vegetable", "Fat"]
+difficulty = 7
+
+[[foods]]
+name = "떡국 (Ddeokguk)"
+kcal = 350.0
+ml = 300.0
+groups = ["Grain", "Meat"]
+difficulty = 4
+
+[[foods]]
+name = "막걸리 (Makgeolli)"
+kcal = 150.0
+ml = 200.0
+groups = ["Grain", "Sugar"]
+difficulty = 1
+
+[[foods]]
+name = "산낙지 (Sannakji)"
+kcal = 150.0
+ml = 100.0
+groups = ["Meat", "Fat"]
+difficulty = 9
+
+[[foods]]
+name = "고추장 삼겹살 (Gochujang Samgyeopsal)"
+kcal = 700.0
+ml = 350.0
+groups = ["Meat", "Fat"]
+difficulty = 6
+
+[[foods]]
+name = "호박죽 (Hobakjuk)"
+kcal = 150.0
+ml = 200.0
+groups = ["Grain", "Sugar"]
+difficulty = 3
+[[foods]]
+name = "고등어구이 (Grilled Mackerel)"
+kcal = 360.0
+ml = 200.0
+groups = ["Meat", "Fat"]
+difficulty = 4
+
+[[foods]]
+name = "배추김치 (Baechu Kimchi)"
+kcal = 60.0
+ml = 100.0
+groups = ["Vegetable", "Fat"]
+difficulty = 6
+
+[[foods]]
+name = "콩나물국 (Kongnamul Guk)"
+kcal = 70.0
+ml = 150.0
+groups = ["Vegetable"]
+difficulty = 3
+
+[[foods]]
+name = "감자조림 (Gamja Jorim)"
+kcal = 150.0
+ml = 100.0
+groups = ["Vegetable", "Sugar", "Fat"]
+difficulty = 4
+
+[[foods]]
+name = "불고기 (Bulgogi)"
+kcal = 300.0
+ml = 200.0
+groups = ["Meat", "Vegetable", "Sugar", "Fat"]
+difficulty = 5
+
+[[foods]]
+name = "해물탕 (Haemultang)"
+kcal = 450.0
+ml = 400.0
+groups = ["Meat", "Vegetable"]
+difficulty = 7
+
+[[foods]]
+name = "된장국 (Doenjang Guk)"
+kcal = 60.0
+ml = 150.0
+groups = ["Vegetable"]
+difficulty = 3
+
+[[foods]]
+name = "무국 (Muguk)"
+kcal = 50.0
+ml = 150.0
+groups = ["Vegetable"]
+difficulty = 2
+
+[[foods]]
+name = "닭계장 (Dakgyejang)"
+kcal = 400.0
+ml = 350.0
+groups = ["Meat", "Vegetable"]
+difficulty = 6
+
+[[foods]]
+name = "두부조림 (Dubu Jorim)"
+kcal = 200.0
+ml = 100.0
+groups = ["Vegetable", "Fat"]
+difficulty = 3
+
+[[foods]]
+name = "소갈비찜 (Galbijjim)"
+kcal = 500.0
+ml = 350.0
+groups = ["Meat", "Vegetable", "Sugar", "Fat"]
+difficulty = 7
+
+[[foods]]
+name = "오징어볶음 (Ojingeo Bokkeum)"
+kcal = 350.0
+ml = 200.0
+groups = ["Meat", "Vegetable", "Fat"]
+difficulty = 6
+
+[[foods]]
+name = "닭발 (Dakbal)"
+kcal = 400.0
+ml = 200.0
+groups = ["Meat", "Fat"]
+difficulty = 5
+
+[[foods]]
+name = "닭도리탕 (Dakdoritang)"
+kcal = 450.0
+ml = 300.0
+groups = ["Meat", "Vegetable"]
+difficulty = 6
+
+[[foods]]
+name = "파전 (Pajeon)"
+kcal = 250.0
+ml = 150.0
+groups = ["Grain", "Vegetable"]
+difficulty = 4
+
+[[foods]]
+name = "짬뽕 (Jjamppong)"
+kcal = 500.0
+ml = 500.0
+groups = ["Grain", "Meat", "Vegetable"]
+difficulty = 7
+
+[[foods]]
+name = "순두부찌개 (Sundubu Jjigae)"
+kcal = 300.0
+ml = 350.0
+groups = ["Vegetable", "Meat"]
+difficulty = 5
+
+[[foods]]
+name = "삼계탕 (Samgyetang)"
+kcal = 800.0
+ml = 700.0
+groups = ["Meat", "Grain"]
+difficulty = 6
+
+[[foods]]
+name = "비빔밥 (Bibimbap)"
+kcal = 500.0
+ml = 350.0
+groups = ["Grain", "Meat", "Vegetable"]
+difficulty = 4
+
+[[foods]]
+name = "돌솥비빔밥 (Dolsot Bibimbap)"
+kcal = 550.0
+ml = 400.0
+groups = ["Grain", "Meat", "Vegetable"]
+difficulty = 5
+
+[[foods]]
+name = "김치볶음밥 (Kimchi Fried Rice)"
+kcal = 400.0
+ml = 300.0
+groups = ["Grain", "Vegetable"]
+difficulty = 3
+
+[[foods]]
+name = "순두부 (Soft Tofu)"
+kcal = 50.0
+ml = 100.0
+groups = ["Vegetable"]
+difficulty = 1
+
+[[foods]]
+name = "된장찌개 (Doenjang Jjigae)"
+kcal = 250.0
+ml = 350.0
+groups = ["Vegetable", "Meat"]
+difficulty = 4
+
+[[foods]]
+name = "갈비탕 (Galbitang)"
+kcal = 600.0
+ml = 500.0
+groups = ["Meat"]
+difficulty = 7
+
+[[foods]]
+name = "불닭볶음면 (Fire Chicken Stir-Fried Noodles)"
+kcal = 550.0
+ml = 150.0
+groups = ["Grain", "Meat", "Fat"]
+difficulty = 2
+
+[[foods]]
+name = "족발 (Jokbal)"
+kcal = 500.0
+ml = 200.0
+groups = ["Meat", "Fat"]
+difficulty = 6
+
+[[foods]]
+name = "보쌈 (Bossam)"
+kcal = 400.0
+ml = 200.0
+groups = ["Meat", "Fat"]
+difficulty = 5
+
+[[foods]]
+name = "양념치킨 (Yangnyeom Chicken)"
+kcal = 600.0
+ml = 300.0
+groups = ["Meat", "Fat", "Sugar"]
+difficulty = 4
+
+[[foods]]
+name = "후라이드치킨 (Fried Chicken)"
+kcal = 500.0
+ml = 300.0
+groups = ["Meat", "Fat"]
+difficulty = 4
+
+[[foods]]
+name = "빙수 (Bingsu)"
+kcal = 500.0
+ml = 500.0
+groups = ["Dairy", "Sugar"]
+difficulty = 2
+
+[[foods]]
+name = "고등어구이 (Grilled Mackerel)"
+kcal = 360.0
+ml = 200.0
+groups = ["Meat", "Fat"]
+difficulty = 4
+
+[[foods]]
+name = "배추김치 (Baechu Kimchi)"
+kcal = 60.0
+ml = 100.0
+groups = ["Vegetable", "Fat"]
+difficulty = 6
+
+[[foods]]
+name = "콩나물국 (Kongnamul Guk)"
+kcal = 70.0
+ml = 150.0
+groups = ["Vegetable"]
+difficulty = 3
+
+[[foods]]
+name = "감자조림 (Gamja Jorim)"
+kcal = 150.0
+ml = 100.0
+groups = ["Vegetable", "Sugar", "Fat"]
+difficulty = 4
+
+[[foods]]
+name = "불고기 (Bulgogi)"
+kcal = 300.0
+ml = 200.0
+groups = ["Meat", "Vegetable", "Sugar", "Fat"]
+difficulty = 5
+
+[[foods]]
+name = "해물탕 (Haemultang)"
+kcal = 450.0
+ml = 400.0
+groups = ["Meat", "Vegetable"]
+difficulty = 7
+
+[[foods]]
+name = "된장국 (Doenjang Guk)"
+kcal = 60.0
+ml = 150.0
+groups = ["Vegetable"]
+difficulty = 3
+
+[[foods]]
+name = "무국 (Muguk)"
+kcal = 50.0
+ml = 150.0
+groups = ["Vegetable"]
+difficulty = 2
+
+[[foods]]
+name = "닭계장 (Dakgyejang)"
+kcal = 400.0
+ml = 350.0
+groups = ["Meat", "Vegetable"]
+difficulty = 6
+
+[[foods]]
+name = "두부조림 (Dubu Jorim)"
+kcal = 200.0
+ml = 100.0
+groups = ["Vegetable", "Fat"]
+difficulty = 3
+
+[[foods]]
+name = "소갈비찜 (Galbijjim)"
+kcal = 500.0
+ml = 350.0
+groups = ["Meat", "Vegetable", "Sugar", "Fat"]
+difficulty = 7
+
+[[foods]]
+name = "오징어볶음 (Ojingeo Bokkeum)"
+kcal = 350.0
+ml = 200.0
+groups = ["Meat", "Vegetable", "Fat"]
+difficulty = 6
+
+[[foods]]
+name = "닭발 (Dakbal)"
+kcal = 400.0
+ml = 200.0
+groups = ["Meat", "Fat"]
+difficulty = 5
+
+[[foods]]
+name = "닭도리탕 (Dakdoritang)"
+kcal = 450.0
+ml = 300.0
+groups = ["Meat", "Vegetable"]
+difficulty = 6
+
+[[foods]]
+name = "파전 (Pajeon)"
+kcal = 250.0
+ml = 150.0
+groups = ["Grain", "Vegetable"]
+difficulty = 4
+
+[[foods]]
+name = "짬뽕 (Jjamppong)"
+kcal = 500.0
+ml = 500.0
+groups = ["Grain", "Meat", "Vegetable"]
+difficulty = 7
+
+[[foods]]
+name = "순두부찌개 (Sundubu Jjigae)"
+kcal = 300.0
+ml = 350.0
+groups = ["Vegetable", "Meat"]
+difficulty = 5
+
+[[foods]]
+name = "삼계탕 (Samgyetang)"
+kcal = 800.0
+ml = 700.0
+groups = ["Meat", "Grain"]
+difficulty = 6
+
+[[foods]]
+name = "비빔밥 (Bibimbap)"
+kcal = 500.0
+ml = 350.0
+groups = ["Grain", "Meat", "Vegetable"]
+difficulty = 4
+
+[[foods]]
+name = "돌솥비빔밥 (Dolsot Bibimbap)"
+kcal = 550.0
+ml = 400.0
+groups = ["Grain", "Meat", "Vegetable"]
+difficulty = 5
+
+[[foods]]
+name = "김치볶음밥 (Kimchi Fried Rice)"
+kcal = 400.0
+ml = 300.0
+groups = ["Grain", "Vegetable"]
+difficulty = 3
+
+[[foods]]
+name = "순두부 (Soft Tofu)"
+kcal = 50.0
+ml = 100.0
+groups = ["Vegetable"]
+difficulty = 1
+
+[[foods]]
+name = "된장찌개 (Doenjang Jjigae)"
+kcal = 250.0
+ml = 350.0
+groups = ["Vegetable", "Meat"]
+difficulty = 4
+
+[[foods]]
+name = "갈비탕 (Galbitang)"
+kcal = 600.0
+ml = 500.0
+groups = ["Meat"]
+difficulty = 7
+
+[[foods]]
+name = "불닭볶음면 (Fire Chicken Stir-Fried Noodles)"
+kcal = 550.0
+ml = 150.0
+groups = ["Grain", "Meat", "Fat"]
+difficulty = 2
+
+[[foods]]
+name = "족발 (Jokbal)"
+kcal = 500.0
+ml = 200.0
+groups = ["Meat", "Fat"]
+difficulty = 6
+
+[[foods]]
+name = "보쌈 (Bossam)"
+kcal = 400.0
+ml = 200.0
+groups = ["Meat", "Fat"]
+difficulty = 5
+
+[[foods]]
+name = "양념치킨 (Yangnyeom Chicken)"
+kcal = 600.0
+ml = 300.0
+groups = ["Meat", "Fat", "Sugar"]
+difficulty = 4
+
+[[foods]]
+name = "후라이드치킨 (Fried Chicken)"
+kcal = 500.0
+ml = 300.0
+groups = ["Meat", "Fat"]
+difficulty = 4
+
+[[foods]]
+name = "빙수 (Bingsu)"
+kcal = 500.0
+ml = 500.0
+groups = ["Dairy", "Sugar"]
+difficulty = 2
+
+[[foods]]
+name = "Cheeseburger"
+kcal = 303.0
+ml = 233.0
+groups = ["Meat", "Grain", "Dairy", "Vegetable", "Fat"]
+difficulty = 4
+
+[[foods]]
+name = "Hot Dog"
+kcal = 150.0
+ml = 75.0
+groups = ["Meat", "Grain"]
+difficulty = 2
+
+[[foods]]
+name = "Fried Chicken"
+kcal = 320.0
+ml = 150.0
+groups = ["Meat", "Fat"]
+difficulty = 3
+
+[[foods]]
+name = "Pizza"
+kcal = 285.0
+ml = 150.0
+groups = ["Grain", "Dairy", "Vegetable", "Meat", "Fat"]
+difficulty = 4
+
+[[foods]]
+name = "Apple Pie"
+kcal = 320.0
+ml = 125.0
+groups = ["Grain", "Fruit", "Fat", "Sugar"]
+difficulty = 6
+
+[[foods]]
+name = "Tacos"
+kcal = 156.0
+ml = 100.0
+groups = ["Meat", "Grain", "Vegetable", "Dairy", "Fat"]
+difficulty = 4
+
+[[foods]]
+name = "Burritos"
+kcal = 500.0
+ml = 350.0
+groups = ["Meat", "Grain", "Vegetable", "Dairy", "Fat"]
+difficulty = 5
+
+[[foods]]
+name = "Churros"
+kcal = 200.0
+ml = 75.0
+groups = ["Grain", "Fat", "Sugar"]
+difficulty = 3
+
+[[foods]]
+name = "Tamales"
+kcal = 285.0
+ml = 150.0
+groups = ["Meat", "Grain", "Vegetable", "Fat"]
+difficulty = 7
+
+[[foods]]
+name = "Quesadillas"
+kcal = 525.0
+ml = 300.0
+groups = ["Grain", "Dairy", "Meat", "Fat"]
+difficulty = 3
+
+[[foods]]
+name = "Carnitas"
+kcal = 424.0
+ml = 150.0
+groups = ["Meat", "Fat"]
+difficulty = 6
+
+[[foods]]
+name = "Enchiladas"
+kcal = 356.0
+ml = 200.0
+groups = ["Grain", "Meat", "Dairy", "Vegetable", "Fat"]
+difficulty = 5
+
+[[foods]]
+name = "Pozole"
+kcal = 150.0
+ml = 300.0
+groups = ["Meat", "Grain", "Vegetable"]
+difficulty = 7
+
+[[foods]]
+name = "Guacamole"
+kcal = 167.0
+ml = 100.0
+groups = ["Vegetable", "Fat"]
+difficulty = 2
+
+[[foods]]
+name = "Salsa"
+kcal = 36.0
+ml = 100.0
+groups = ["Vegetable"]
+difficulty = 1
+
+[[foods]]
+name = "Nachos"
+kcal = 346.0
+ml = 100.0
+groups = ["Grain", "Dairy", "Vegetable", "Meat", "Fat"]
+difficulty = 2
+
+[[foods]]
+name = "Beef Stew"
+kcal = 400.0
+ml = 350.0
+groups = ["Meat", "Vegetable", "Fat"]
+difficulty = 4
+
+[[foods]]
+name = "Shepherd's Pie"
+kcal = 350.0
+ml = 200.0
+groups = ["Meat", "Grain", "Vegetable", "Dairy", "Fat"]
+difficulty = 5
+
+[[foods]]
+name = "Egg Salad"
+kcal = 150.0
+ml = 100.0
+groups = ["Meat", "Vegetable", "Fat"]
+difficulty = 2
+
+[[foods]]
+name = "Peanut Butter Sandwich"
+kcal = 300.0
+ml = 150.0
+groups = ["Grain", "Fat"]
+difficulty = 1
+
+[[foods]]
+name = "Chicken Fried Rice"
+kcal = 500.0
+ml = 300.0
+groups = ["Meat", "Grain", "Vegetable"]
+difficulty = 3
+
+[[foods]]
+name = "Spaghetti Bolognese"
+kcal = 600.0
+ml = 400.0
+groups = ["Grain", "Meat", "Vegetable", "Dairy"]
+difficulty = 4
+
+[[foods]]
+name = "Tuna Sandwich"
+kcal = 250.0
+ml = 150.0
+groups = ["Meat", "Grain", "Fat", "Vegetable"]
+difficulty = 2
+
+[[foods]]
+name = "Veggie Pizza"
+kcal = 600.0
+ml = 350.0
+groups = ["Grain", "Vegetable", "Dairy", "Fat"]
+difficulty = 3
+
+[[foods]]
+name = "Cheeseburger"
+kcal = 500.0
+ml = 200.0
+groups = ["Meat", "Grain", "Dairy", "Fat"]
+difficulty = 3
+
+[[foods]]
+name = "Chicken Noodle Soup"
+kcal = 150.0
+ml = 200.0
+groups = ["Meat", "Grain", "Vegetable"]
+difficulty = 2
+
+[[foods]]
+name = "Ham and Cheese Sandwich"
+kcal = 300.0
+ml = 150.0
+groups = ["Meat", "Grain", "Dairy", "Fat"]
+difficulty = 1
+
+[[foods]]
+name = "Macaroni and Cheese"
+kcal = 350.0
+ml = 200.0
+groups = ["Grain", "Dairy", "Fat"]
+difficulty = 2
+
+[[foods]]
+name = "Pancakes"
+kcal = 200.0
+ml = 150.0
+groups = ["Grain", "Sugar", "Dairy"]
+difficulty = 2
+
+[[foods]]
+name = "Scrambled Eggs"
+kcal = 150.0
+ml = 100.0
+groups = ["Meat", "Dairy", "Fat"]
+difficulty = 2
+
+[[foods]]
+name = "Tofu Stir Fry"
+kcal = 250.0
+ml = 200.0
+groups = ["Meat", "Vegetable", "Fat"]
+difficulty = 3
+
+[[foods]]
+name = "Fried Chicken"
+kcal = 400.0
+ml = 200.0
+groups = ["Meat", "Grain", "Fat"]
+difficulty = 4
+
+[[foods]]
+name = "Roasted Almonds"
+kcal = 160.0
+ml = 30.0
+groups = ["Fat"]
+difficulty = 1
+
+[[foods]]
+name = "Banana Bread"
+kcal = 320.0
+ml = 100.0
+groups = ["Grain", "Sugar", "Fat", "Fruit"]
+difficulty = 3
+
+[[foods]]
+name = "Avocado Toast"
+kcal = 250.0
+ml = 100.0
+groups = ["Grain", "Vegetable", "Fat"]
+difficulty = 2
+
+[[foods]]
+name = "Caesar Salad"
+kcal = 180.0
+ml = 150.0
+groups = ["Vegetable", "Meat", "Dairy", "Fat"]
+difficulty = 2
+
+[[foods]]
+name = "Baked Salmon"
+kcal = 350.0
+ml = 200.0
+groups = ["Meat", "Fat"]
+difficulty = 4
+
+[[foods]]
+name = "Stuffed Bell Peppers"
+kcal = 200.0
+ml = 200.0
+groups = ["Vegetable", "Meat", "Grain"]
+difficulty = 4
+
+[[foods]]
+name = "Grilled Cheese Sandwich"
+kcal = 300.0
+ml = 100.0
+groups = ["Grain", "Dairy", "Fat"]
+difficulty = 1
+
+[[foods]]
+name = "Spinach Quiche"
+kcal = 300.0
+ml = 150.0
+groups = ["Grain", "Vegetable", "Dairy", "Fat"]
+difficulty = 4
+
+[[foods]]
+name = "Pasta Primavera"
+kcal = 400.0
+ml = 250.0
+groups = ["Grain", "Vegetable", "Dairy"]
+difficulty = 4
+
+[[foods]]
+name = "Tomato Soup"
+kcal = 150.0
+ml = 200.0
+groups = ["Vegetable"]
+difficulty = 2
+
+[[foods]]
+name = "Greek Salad"
+kcal = 150.0
+ml = 200.0
+groups = ["Vegetable", "Dairy", "Fat"]
+difficulty = 2
+
+[[foods]]
+name = "Steak and Potatoes"
+kcal = 650.0
+ml = 300.0
+groups = ["Meat", "Vegetable", "Fat"]
+difficulty = 5
+
+[[foods]]
+name = "Apple Pie"
+kcal = 320.0
+ml = 150.0
+groups = ["Grain", "Sugar", "Fat", "Fruit"]
+difficulty = 5
+
+[[foods]]
+name = "Blueberry Muffin"
+kcal = 150.0
+ml = 50.0
+groups = ["Grain", "Sugar", "Dairy", "Fruit"]
+difficulty = 3
+
+[[foods]]
+name = "Chicken Curry"
+kcal = 400.0
+ml = 350.0
+groups = ["Meat", "Fat", "Vegetable"]
+difficulty = 4
+
+[[foods]]
+name = "Baked Potato"
+kcal = 200.0
+ml = 150.0
+groups = ["Vegetable", "Fat"]
+difficulty = 2
+
+[[foods]]
+name = "Garlic Bread"
+kcal = 250.0
+ml = 100.0
+groups = ["Grain", "Fat"]
+difficulty = 1
+
+[[foods]]
+name = "Pesto Pasta"
+kcal = 400.0
+ml = 250.0
+groups = ["Grain", "Vegetable", "Fat"]
+difficulty = 2
+
+[[foods]]
+name = "Grilled Shrimp"
+kcal = 200.0
+ml = 100.0
+groups = ["Meat", "Fat"]
+difficulty = 3
+
+[[foods]]
+name = "Eggs Benedict"
+kcal = 300.0
+ml = 200.0
+groups = ["Grain", "Meat", "Dairy", "Fat"]
+difficulty = 4
+
+[[foods]]
+name = "Sesame Chicken"
+kcal = 350.0
+ml = 250.0
+groups = ["Meat", "Fat", "Sugar"]
+difficulty = 3
+
+[[foods]]
+name = "Fruit Salad"
+kcal = 100.0
+ml = 200.0
+groups = ["Fruit"]
+difficulty = 2
+
+[[foods]]
+name = "Chocolate Chip Cookies"
+kcal = 75.0
+ml = 30.0
+groups = ["Grain", "Sugar", "Fat", "Dairy"]
+difficulty = 3
+
+[[foods]]
+name = "Mushroom Risotto"
+kcal = 350.0
+ml = 300.0
+groups = ["Grain", "Vegetable", "Dairy", "Fat"]
+difficulty = 5
+
+[[foods]]
+name = "French Fries"
+kcal = 365.0
+ml = 200.0
+groups = ["Vegetable", "Fat"]
+difficulty = 2
+
+[[foods]]
+name = "Nachos"
+kcal = 600.0
+ml = 350.0
+groups = ["Grain", "Dairy", "Vegetable", "Meat", "Fat"]
+difficulty = 3
+
+[[foods]]
+name = "Quesadilla"
+kcal = 500.0
+ml = 200.0
+groups = ["Grain", "Dairy", "Meat", "Fat"]
+difficulty = 2
+
+[[foods]]
+name = "Potato Chips"
+kcal = 152.0
+ml = 50.0
+groups = ["Vegetable", "Fat"]
+difficulty = 1
+
+[[foods]]
+name = "Lentil Soup"
+kcal = 150.0
+ml = 200.0
+groups = ["Vegetable"]
+difficulty = 2
+
+[[foods]]
+name = "Chicken Tacos"
+kcal = 200.0
+ml = 100.0
+groups = ["Grain", "Meat", "Vegetable", "Fat"]
+difficulty = 3
+
+[[foods]]
+name = "Bagel with Cream Cheese"
+kcal = 290.0
+ml = 100.0
+groups = ["Grain", "Dairy", "Fat"]
+difficulty = 1
+
+[[foods]]
+name = "Steamed Dumplings"
+kcal = 250.0
+ml = 150.0
+groups = ["Grain", "Meat", "Vegetable"]
+difficulty = 4
+
+[[foods]]
+name = "Pancakes with Syrup"
+kcal = 520.0
+ml = 200.0
+groups = ["Grain", "Sugar", "Dairy", "Fat"]
+difficulty = 2
+
+[[foods]]
+name = "Spaghetti Bolognese"
+kcal = 365.0
+ml = 200.0
+groups = ["Grain", "Meat", "Vegetable", "Fat"]
+difficulty = 4
+
+[[foods]]
+name = "Mashed Potatoes"
+kcal = 214.0
+ml = 200.0
+groups = ["Vegetable", "Dairy", "Fat"]
+difficulty = 2
+
+[[foods]]
+name = "Chicken Fried Rice"
+kcal = 500.0
+ml = 250.0
+groups = ["Grain", "Meat", "Vegetable", "Fat"]
+difficulty = 3
+
+[[foods]]
+name = "Cheese Pizza"
+kcal = 285.0
+ml = 150.0
+groups = ["Grain", "Dairy", "Fat"]
+difficulty = 3
+
+[[foods]]
+name = "Scrambled Eggs"
+kcal = 100.0
+ml = 100.0
+groups = ["Meat", "Fat"]
+difficulty = 1
+
+[[foods]]
+name = "Vegetable Stir Fry"
+kcal = 200.0
+ml = 200.0
+groups = ["Vegetable", "Fat"]
+difficulty = 3
+
+[[foods]]
+name = "Beef Burrito"
+kcal = 400.0
+ml = 200.0
+groups = ["Grain", "Meat", "Vegetable", "Dairy", "Fat"]
+difficulty = 4
+
+[[foods]]
+name = "Bacon Sandwich"
+kcal = 350.0
+ml = 150.0
+groups = ["Grain", "Meat", "Fat"]
+difficulty = 2
+
+[[foods]]
+name = "Peanut Butter and Jelly Sandwich"
+kcal = 350.0
+ml = 150.0
+groups = ["Grain", "Fat", "Sugar"]
+difficulty = 1
+
+[[foods]]
+name = "Cheese Omelette"
+kcal = 200.0
+ml = 150.0
+groups = ["Meat", "Dairy", "Fat"]
+difficulty = 2
+
+[[foods]]
+name = "Ramen Noodles"
+kcal = 380.0
+ml = 500.0
+groups = ["Grain", "Meat", "Vegetable", "Fat"]
+difficulty = 3
+
+[[foods]]
+name = "Vegetable Fried Rice"
+kcal = 240.0
+ml = 200.0
+groups = ["Grain", "Vegetable", "Fat"]
+difficulty = 3
+
+[[foods]]
+name = "Tuna Salad"
+kcal = 200.0
+ml = 150.0
+groups = ["Meat", "Vegetable", "Fat"]
+difficulty = 2
+
+[[foods]]
+name = "Chocolate Brownie"
+kcal = 300.0
+ml = 75.0
+groups = ["Grain", "Sugar", "Fat", "Dairy"]
+difficulty = 4
+
+[[foods]]
+name = "Cheese and Tomato Sandwich"
+kcal = 280.0
+ml = 150.0
+groups = ["Grain", "Dairy", "Vegetable", "Fat"]
+difficulty = 1
+
+[[foods]]
+name = "Beef Stew"
+kcal = 400.0
+ml = 300.0
+groups = ["Meat", "Vegetable", "Fat"]
+difficulty = 5
+
+[[foods]]
+name = "Grilled Cheese Sandwich"
+kcal = 330.0
+ml = 150.0
+groups = ["Grain", "Dairy", "Fat"]
+difficulty = 1
+
+[[foods]]
+name = "Apple Pie"
+kcal = 320.0
+ml = 150.0
+groups = ["Grain", "Fruit", "Sugar", "Fat", "Dairy"]
+difficulty = 6
+
+[[foods]]
+name = "Chicken Caesar Salad"
+kcal = 350.0
+ml = 200.0
+groups = ["Meat", "Vegetable", "Fat", "Dairy"]
+difficulty = 2
+
+[[foods]]
+name = "Lemon Chicken"
+kcal = 300.0
+ml = 200.0
+groups = ["Meat", "Fat", "Sugar"]
+difficulty = 3
+
+[[foods]]
+name = "Fettuccine Alfredo"
+kcal = 600.0
+ml = 350.0
+groups = ["Grain", "Dairy", "Fat"]
+difficulty = 4
+
+[[foods]]
+name = "Grilled Salmon"
+kcal = 280.0
+ml = 200.0
+groups = ["Meat", "Fat"]
+difficulty = 4
+
+[[foods]]
+name = "Blueberry Muffin"
+kcal = 150.0
+ml = 50.0
+groups = ["Grain", "Sugar", "Fat", "Dairy"]
+difficulty = 3
+
+[[foods]]
+name = "Chicken Noodle Soup"
+kcal = 200.0
+ml = 250.0
+groups = ["Meat", "Grain", "Vegetable"]
+difficulty = 3
+
+[[foods]]
+name = "Strawberry Cheesecake"
+kcal = 400.0
+ml = 150.0
+groups = ["Grain", "Sugar", "Fat", "Dairy", "Fruit"]
+difficulty = 6
+
+[[foods]]
+name = "Shrimp Stir Fry"
+kcal = 300.0
+ml = 200.0
+groups = ["Meat", "Grain", "Vegetable", "Fat"]
+difficulty = 4
+
+[[foods]]
+name = "Spinach and Feta Pizza"
+kcal = 700.0
+ml = 300.0
+groups = ["Grain", "Dairy", "Vegetable", "Fat"]
+difficulty = 4
+
+[[foods]]
+name = "Beef Tacos"
+kcal = 400.0
+ml = 200.0
+groups = ["Meat", "Grain", "Vegetable", "Dairy", "Fat"]
+difficulty = 3
+
+[[foods]]
+name = "Pancakes with Maple Syrup"
+kcal = 350.0
+ml = 200.0
+groups = ["Grain", "Sugar", "Fat", "Dairy"]
+difficulty = 2
+
+[[foods]]
+name = "Mushroom Risotto"
+kcal = 400.0
+ml = 250.0
+groups = ["Grain", "Dairy", "Vegetable", "Fat"]
+difficulty = 5
+
+[[foods]]
+name = "Hamburger with Fries"
+kcal = 900.0
+ml = 400.0
+groups = ["Meat", "Grain", "Vegetable", "Fat"]
+difficulty = 3
+
+[[foods]]
+name = "Tiramisu"
+kcal = 450.0
+ml = 150.0
+groups = ["Grain", "Sugar", "Dairy", "Fat"]
+difficulty = 5
+
+[[foods]]
+name = "Tuna Sashimi"
+kcal = 200.0
+ml = 100.0
+groups = ["Meat", "Fat"]
+difficulty = 5

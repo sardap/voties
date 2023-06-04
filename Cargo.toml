@@ -1,0 +1,31 @@
+[package]
+name = "voties"
+version = "0.1.0"
+edition = "2021"
+
+[target.wasm32-unknown-unknown]
+runner = "wasm-server-runner"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+# Enable a small amount of optimization in debug mode
+[profile.dev]
+opt-level = 0
+
+# Enable high optimizations for dependencies (incl. Bevy), but not for our code:
+[profile.dev.package."*"]
+opt-level = 3
+
+[dependencies]
+bevy = "0.10.1"
+bevy_common_assets = { version = "0.6.0", features = ["toml", "serde_toml", "rmp-serde", "msgpack"] }
+lazy_static = "1.4.0"
+measurements = "0.11.0"
+rand = { version = "0.8.5", features = ["small_rng"] }
+rand_xoshiro = "0.6.0"
+serde = "1.0.163"
+serde_json = "1.0.96"
+string-builder = "0.2.0"
+strum = "0.24.1"
+strum_macros = "0.24.3"
+toml = "0.7.4"
