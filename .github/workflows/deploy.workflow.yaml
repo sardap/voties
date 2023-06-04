@@ -26,7 +26,7 @@ jobs:
       - name: wasm-bindgen
         run: wasm-bindgen --typescript --out-dir ./out --target web ./target/wasm32-unknown-unknown/release/voties.wasm
       - name: Zip output
-        run: zip -r voties_wasm.zip ./out
+        run: zip -r voties_wasm.zip ./out ./assets
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
