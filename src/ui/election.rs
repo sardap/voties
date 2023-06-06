@@ -163,7 +163,7 @@ pub fn update_election_status_system(
     election_status: Query<Entity, With<ElectionStatusNode>>,
     election_options: Query<Entity, With<ElectionOptionsNode>>,
     mut text: Query<&mut Text>,
-    elections: Query<(&Election, &name::Name), Changed<Election>>,
+    elections: Query<(&Election, &name::Name)>,
 ) {
     let (root_entity, root_vis) = match root_vis.iter().next() {
         Some(election) => election,
@@ -183,11 +183,11 @@ pub fn update_election_status_system(
     elections.sort_by(|a, b| a.open_since.cmp(&b.open_since));
 
     if elections.len() == 0 {
-        if root_vis != &Visibility::Hidden {
+        if *root_vis != Visibility::Hidden {
             commands.entity(root_entity).insert(Visibility::Hidden);
         }
         return;
-    } else if root_vis != &Visibility::Visible {
+    } else if *root_vis != Visibility::Visible {
         commands.entity(root_entity).insert(Visibility::Visible);
     }
 

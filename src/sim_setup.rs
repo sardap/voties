@@ -5,12 +5,11 @@ use lazy_static::lazy_static;
 use rand::seq::SliceRandom;
 
 use crate::{
+    building::{Building, BuildingPlots},
     death,
     elections::voting_center::VotingCenterBundle,
-    farm::{self},
-    hunger, name,
+    hunger, mint, name,
     people::{self, create_person},
-    reproduction::ReproductiveZoneBundle,
     rng, AppState,
 };
 
@@ -18,6 +17,7 @@ pub fn setting_up_world(
     mut commands: Commands,
     mut state: ResMut<NextState<AppState>>,
     mut rng: ResMut<rng::Rng>,
+    mut plots: ResMut<BuildingPlots>,
     food_collection: Res<hunger::FoodCollection>,
     asset_server: Res<AssetServer>,
     time: Res<Time>,
@@ -26,11 +26,12 @@ pub fn setting_up_world(
     create_starting_farms(
         &mut commands,
         &asset_server,
+        &mut plots,
         &mut rng.inner,
         &food_collection,
     );
 
-    create_reproductive_zone(&mut commands, &asset_server);
+    create_reproductive_zone(&mut commands, &asset_server, &mut plots, &mut rng.inner);
 
     create_starting_people(
         &mut commands,
@@ -42,34 +43,33 @@ pub fn setting_up_world(
 
     create_voting_center(&mut commands, &asset_server);
 
+    crete_starting_mints(&mut commands, &asset_server, &mut plots, &mut rng.inner);
+
     state.set(AppState::SettingUpUi);
 }
 
 fn create_starting_farms(
     commands: &mut Commands,
     asset_server: &AssetServer,
+    plots: &mut BuildingPlots,
     rng: &mut impl rand::Rng,
     food_collection: &hunger::FoodCollection,
 ) {
-    for i in 0..2 {
+    for _ in 0..2 {
         let produces = food_collection.foods.choose(rng).unwrap().clone();
 
-        farm::create_farm(
-            commands,
-            asset_server,
-            produces,
-            Vec3::new(i as f32 * 150.0, 120.0, 0.0),
-            rng,
-        );
+        Building::Farm(produces.clone()).build(commands, asset_server, plots, rng);
     }
 }
 
-fn create_reproductive_zone(commands: &mut Commands, asset_server: &AssetServer) {
-    for i in 0..1 {
-        commands.spawn(ReproductiveZoneBundle::new(
-            &asset_server,
-            Vec2::new((i + 1) as f32 * -150.0, 120.0),
-        ));
+fn create_reproductive_zone(
+    commands: &mut Commands,
+    asset_server: &AssetServer,
+    plots: &mut BuildingPlots,
+    rng: &mut impl rand::Rng,
+) {
+    for _ in 0..1 {
+        Building::ReproductiveZone.build(commands, asset_server, plots, rng);
     }
 }
 
@@ -126,4 +126,17 @@ fn create_voting_center(commands: &mut Commands, asset_server: &AssetServer) {
         asset_server,
         Vec3::new(0.0, 0.0, 0.0),
     ));
+}
+
+fn crete_starting_mints(
+    commands: &mut Commands,
+    asset_server: &AssetServer,
+    plots: &mut BuildingPlots,
+    rng: &mut impl rand::Rng,
+) {
+    let amount = rng.gen_range(400.0..600.0);
+
+    for _ in 0..1 {
+        mint::MintBundle::spawn(commands, asset_server, amount, plots.next());
+    }
 }

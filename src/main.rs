@@ -9,6 +9,8 @@ use bevy::{
     DefaultPlugins,
 };
 use bevy_common_assets::toml::TomlAssetPlugin;
+use bevy_enum_filter::prelude::*;
+use building::BuildingPlots;
 use rand::Rng;
 
 mod age;
@@ -24,6 +26,8 @@ mod goals;
 mod grave;
 mod hunger;
 mod info;
+mod mint;
+mod money;
 mod movement;
 mod name;
 mod people;
@@ -67,6 +71,7 @@ fn main() {
     };
 
     App::new()
+        .add_enum_filter::<building::BuildingStatus>()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: "VotingVotingVoting".into(),
@@ -93,6 +98,8 @@ fn main() {
         )))
         .insert_resource(name::NameGenerator::default())
         .insert_resource(elections::election::ElectionHistory::default())
+        .insert_resource(BuildingPlots::new())
+        .insert_resource(money::Treasury::new())
         .add_plugin(rng::RngPlugin::with_seed(rng::Seed::Number(seed)))
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_plugin(stats::StatsPlugin)
@@ -114,6 +121,7 @@ fn main() {
             ui::election::update_election_status_system.in_set(UiSet::Normal),
             ui::button::button_color_system.in_set(UiSet::Normal),
             ui::resources::building_button_system.in_set(UiSet::Normal),
+            ui::money::update_election_status_system.in_set(UiSet::Normal),
         ))
         .add_systems((
             hunger::drain_stomach_system.in_set(LifeSet::World),
@@ -131,6 +139,13 @@ fn main() {
             elections::election::start_election_system.in_set(LifeSet::World),
             goals::vote_goal_system.in_set(LifeSet::Goal),
             elections::election::close_elections_system.in_set(LifeSet::World),
+        ))
+        .add_systems((
+            farm::update_farm_tint_system.in_set(LifeSet::World),
+            mint::mints_have_become_dilapidated_system.in_set(LifeSet::World),
+            mint::mint_produce_system.in_set(LifeSet::World),
+            money::upkeep_cost_system.in_set(LifeSet::World),
+            building::change_building_status_system.in_set(LifeSet::World),
         ))
         .add_systems(
             (people::create_grave_system, death::remove_dead_system)

@@ -171,6 +171,7 @@ pub struct Reproducing {
 pub fn step_reproduce_goal_system(
     mut commands: Commands,
     time: Res<Time>,
+    mut rng: ResMut<rng::Rng>,
     mut person: Query<
         (
             Entity,
@@ -244,18 +245,20 @@ pub fn step_reproduce_goal_system(
                         continue;
                     }
 
-                    let next_reproduction_time = time.elapsed() + Duration::from_secs(120);
+                    let next_reproduction_time = time.elapsed() + Duration::from_secs(30);
                     {
                         let mut mate_reproductive = match reproductive_query.get_mut(event.other) {
                             Ok(result) => result,
                             Err(_) => continue,
                         };
-                        mate_reproductive.next_reproduction = next_reproduction_time;
+                        mate_reproductive.next_reproduction = next_reproduction_time
+                            + Duration::from_secs(rng.inner.gen_range(0..30));
                     }
 
                     {
                         let mut reproductive = reproductive_query.get_mut(entity).unwrap();
-                        reproductive.next_reproduction = next_reproduction_time;
+                        reproductive.next_reproduction = next_reproduction_time
+                            + Duration::from_secs(rng.inner.gen_range(0..30));
                     }
 
                     commands.entity(entity).insert(reproduction::Pregnant {
@@ -297,11 +300,12 @@ pub fn step_wander_goal_system(
     for (entity, mut movement_goal, position, mut wander) in &mut query {
         match wander.state {
             WanderState::FindingTarget => {
-                let new_target = Vec3::new(
-                    rng.inner.gen_range(-400.0..400.0),
-                    rng.inner.gen_range(-300.0..300.0),
-                    position.translation.z,
-                );
+                let new_target = position.translation
+                    + Vec3::new(
+                        rng.inner.gen_range(-100.0..100.0),
+                        rng.inner.gen_range(-100.0..100.0),
+                        0.0,
+                    );
                 movement_goal.target = Some(new_target);
                 wander.state = WanderState::MovingToTarget;
             }

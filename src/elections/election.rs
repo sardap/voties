@@ -5,14 +5,14 @@ use rand::{seq::SliceRandom, Rng};
 
 use crate::{
     age::Age,
-    building::Building,
+    building::{Building, BuildingPlots},
     death::{DeathReason, Mortal},
     energy::Energy,
     hunger::{FoodCollection, FoodPreferences, FoodTemplate},
     name,
     reproduction::Reproductive,
     rng,
-    ui::resources::{crete_building_button, BuildingButtonNode},
+    ui::resources::BuildingButtonNode,
 };
 
 use super::{
@@ -237,11 +237,10 @@ pub fn close_elections_system(
     time: Res<Time>,
     mut election_history: ResMut<ElectionHistory>,
     asset_server: Res<AssetServer>,
+    mut plots: ResMut<BuildingPlots>,
+    mut rng: ResMut<rng::Rng>,
     mut query: Query<(Entity, &mut Election, &name::Name)>,
-    button_root: Query<Entity, With<BuildingButtonNode>>,
 ) {
-    let button_root = button_root.iter().next().unwrap();
-
     for (entity, mut election, name) in &mut query {
         election.time_open += time.delta();
 
@@ -256,22 +255,18 @@ pub fn close_elections_system(
         };
 
         match result.get_winner() {
-            ElectionOption::MakeFarm(food_template) => {
-                crete_building_button(
-                    &mut commands,
-                    button_root,
-                    &asset_server,
-                    Building::Farm(food_template.clone()),
-                );
-            }
-            ElectionOption::MakeRz => {
-                crete_building_button(
-                    &mut commands,
-                    button_root,
-                    &asset_server,
-                    Building::ReproductiveZone,
-                );
-            }
+            ElectionOption::MakeFarm(food_template) => Building::Farm(food_template.clone()).build(
+                &mut commands,
+                &asset_server,
+                &mut plots,
+                &mut rng.inner,
+            ),
+            ElectionOption::MakeRz => Building::ReproductiveZone.build(
+                &mut commands,
+                &asset_server,
+                &mut plots,
+                &mut rng.inner,
+            ),
         };
 
         election_history.results.push(ElectionResult {
@@ -326,7 +321,7 @@ fn get_options(
 ) -> Vec<ElectionOption> {
     let mut wants = HashMap::new();
 
-    for (reproductive, _age, mortal, energy) in query {
+    for (_reproductive, _age, mortal, energy) in query {
         if let Some(mortal) = mortal {
             for risk in &mortal.at_risk {
                 match risk {
@@ -344,11 +339,11 @@ fn get_options(
             }
         }
 
-        if let Some(reproductive) = reproductive {
-            if reproductive.next_reproduction > time.elapsed() {
-                add_to_tally(&mut wants, Want::Reproduction);
-            }
-        }
+        // if let Some(reproductive) = reproductive {
+        //     if reproductive.next_reproduction > time.elapsed() {
+        //         add_to_tally(&mut wants, Want::Reproduction);
+        //     }
+        // }
     }
 
     let mut wants: Vec<WantTally> = wants

@@ -1,5 +1,3 @@
-use bevy::prelude::*;
-
 use super::{
     election::{ElectionImpl, ElectionOption, ElectionTypeResult},
     voting_methods::{OptionRating, SingleOptionBallot, VotingMethod},

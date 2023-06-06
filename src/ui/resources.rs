@@ -1,7 +1,9 @@
 use bevy::prelude::*;
 
 use crate::{
-    assets, building::Building, farm::create_farm, reproduction::ReproductiveZoneBundle, rng,
+    assets,
+    building::{Building, BuildingPlots},
+    rng,
 };
 
 use super::button;
@@ -13,10 +15,11 @@ pub struct BuildingButtonBundle {
     pub button: ButtonBundle,
 }
 
-pub fn setup(parent: Entity, commands: &mut Commands, asset_server: &AssetServer) {
+pub fn setup(parent: Entity, commands: &mut Commands) {
     commands.entity(parent).with_children(|parent| {
         parent
             .spawn(NodeBundle {
+                visibility: Visibility::Hidden,
                 style: Style {
                     size: Size::new(Val::Percent(70.0), Val::Percent(15.0)),
                     position: UiRect {
@@ -45,7 +48,7 @@ pub fn setup(parent: Entity, commands: &mut Commands, asset_server: &AssetServer
     });
 }
 
-pub fn crete_building_button(
+pub fn _crete_building_button(
     commands: &mut Commands,
     building_button_node: Entity,
     asset_server: &AssetServer,
@@ -108,6 +111,7 @@ pub struct BuildingButton {
 pub fn building_button_system(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
+    mut plots: ResMut<BuildingPlots>,
     mut rng: ResMut<rng::Rng>,
     mut interaction_query: Query<
         (Entity, &Interaction, &BuildingButton),
@@ -117,23 +121,9 @@ pub fn building_button_system(
     for (entity, interaction, building) in &mut interaction_query {
         match *interaction {
             Interaction::Clicked => {
-                match building.target.clone() {
-                    Building::Farm(produces) => {
-                        create_farm(
-                            &mut commands,
-                            &asset_server,
-                            produces,
-                            Vec3::new(50.0, 80.0, 0.0),
-                            &mut rng.inner,
-                        );
-                    }
-                    Building::ReproductiveZone => {
-                        commands.spawn(ReproductiveZoneBundle::new(
-                            &asset_server,
-                            Vec2::new(50.0, 200.0),
-                        ));
-                    }
-                }
+                building
+                    .target
+                    .build(&mut commands, &asset_server, &mut plots, &mut rng.inner);
 
                 commands.entity(entity).despawn_recursive();
             }
