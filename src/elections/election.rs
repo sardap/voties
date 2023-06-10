@@ -9,13 +9,15 @@ use crate::{
     death::{DeathReason, Mortal},
     energy::Energy,
     hunger::{FoodCollection, FoodPreferences, FoodTemplate},
+    money::Treasury,
     name,
     reproduction::Reproductive,
     rng,
-    ui::resources::BuildingButtonNode,
+    world_stats::WorldStats,
 };
 
 use super::{
+    approval::{Approval, ApprovalResult},
     first_pass_the_post::{FirstPastThePost, FirstPastThePostResult},
     voter::Voter,
     voting_methods::OptionRating,
@@ -36,12 +38,14 @@ pub struct ElectionResult {
 #[derive(Debug)]
 pub enum ElectionTypeResult {
     FirstPastThePostResult(FirstPastThePostResult),
+    ApprovalResult(ApprovalResult),
 }
 
 impl ElectionTypeResult {
     pub fn get_winner(&self) -> &ElectionOption {
         match self {
             ElectionTypeResult::FirstPastThePostResult(result) => &result.winner,
+            ElectionTypeResult::ApprovalResult(result) => &result.winner,
         }
     }
 }
@@ -54,6 +58,23 @@ pub trait ElectionImpl {
 #[derive(Debug, Clone)]
 pub enum ElectionType {
     FirstPastThePost(FirstPastThePost),
+    Approval(Approval),
+}
+
+impl ElectionType {
+    pub fn vote(&mut self, option_ratings: &[OptionRating]) {
+        match self {
+            ElectionType::FirstPastThePost(election) => election.vote(option_ratings),
+            ElectionType::Approval(election) => election.vote(option_ratings),
+        }
+    }
+
+    pub fn result(&self, options: &[ElectionOption]) -> ElectionTypeResult {
+        match self {
+            ElectionType::FirstPastThePost(election) => election.result(options),
+            ElectionType::Approval(election) => election.result(options),
+        }
+    }
 }
 
 impl Default for ElectionType {
@@ -66,6 +87,7 @@ impl ToString for ElectionType {
     fn to_string(&self) -> String {
         match self {
             ElectionType::FirstPastThePost(_) => "First Past The Post".to_string(),
+            ElectionType::Approval(_) => "Approval".to_string(),
         }
     }
 }
@@ -74,6 +96,8 @@ impl ToString for ElectionType {
 pub enum ElectionOption {
     MakeFarm(FoodTemplate),
     MakeRz,
+    MoneyHole,
+    Mint,
 }
 
 impl ToString for ElectionOption {
@@ -83,6 +107,8 @@ impl ToString for ElectionOption {
                 format!("Make \"{}\" Farm", food_template.name)
             }
             ElectionOption::MakeRz => "Make a bone zone".to_string(),
+            ElectionOption::MoneyHole => format!("Make a money hole"),
+            ElectionOption::Mint => format!("Make a mint"),
         }
     }
 }
@@ -97,13 +123,23 @@ pub struct Election {
 
 #[derive(Debug)]
 pub struct VoterAttributes<'a> {
+    pub voter: &'a Voter,
     pub energy: Option<&'a Energy>,
     pub food_preferences: Option<&'a FoodPreferences>,
     pub reproductive: Option<&'a Reproductive>,
 }
 
+mod want_level {
+    pub const NONE: i32 = 0;
+    pub const LOW: i32 = 10;
+    pub const SLIGHTLY: i32 = 20;
+    pub const MEDIUM: i32 = 50;
+    pub const HIGH: i32 = 100;
+    pub const VERY_HIGH: i32 = 200;
+}
+
 impl Election {
-    pub fn vote(&mut self, voter: Entity, attributes: VoterAttributes) {
+    pub fn vote(&mut self, voter: Entity, attributes: VoterAttributes, stats: &WorldStats) {
         if self.voted.contains(&voter) {
             return;
         }
@@ -115,32 +151,63 @@ impl Election {
         for (index, option) in self.options.iter().enumerate() {
             let rating = match option {
                 ElectionOption::MakeFarm(food_template) => {
-                    let mut rating = 0;
+                    let mut rating = want_level::NONE;
 
                     if let Some(energy) = attributes.energy {
-                        if energy.current_kcal < energy.max_kcal * 0.5 {
-                            rating += 1;
+                        if energy.current_kcal < energy.max_kcal * 0.3 {
+                            rating += want_level::MEDIUM;
                         }
                     }
 
                     if let Some(food_preferences) = attributes.food_preferences {
+                        for food_group in &food_template.groups {
+                            if food_preferences.prefers.contains(&food_group) {
+                                rating += want_level::LOW;
+                            }
+                        }
+
                         if !food_preferences.will_eat(&food_template.get_food()) {
-                            rating = 0;
+                            rating = want_level::NONE;
                         }
                     }
 
                     rating
                 }
                 ElectionOption::MakeRz => {
-                    let mut rating = 0;
+                    let mut rating = want_level::NONE;
 
                     if let Some(reproductive) = attributes.reproductive {
                         if reproductive.wants_to_reproduce() {
-                            rating += 1;
+                            rating += want_level::HIGH;
                         }
                     }
 
                     rating
+                }
+                ElectionOption::MoneyHole => {
+                    let filled_percentage: f64 = stats.hole_filled_capacity.average();
+
+                    if filled_percentage > 0.9 {
+                        want_level::HIGH
+                    } else if filled_percentage > 0.7 {
+                        want_level::SLIGHTLY
+                    } else {
+                        want_level::NONE
+                    }
+                }
+                ElectionOption::Mint => {
+                    let building_count = stats.buildings.count();
+                    let dilapidated_count = stats
+                        .buildings
+                        .get(&crate::building::BuildingStatus::Dilapidated);
+
+                    let percentage_dilapidated = dilapidated_count as f64 / building_count as f64;
+
+                    if percentage_dilapidated > 0.8 {
+                        want_level::VERY_HIGH
+                    } else {
+                        want_level::NONE
+                    }
                 }
             };
 
@@ -150,11 +217,21 @@ impl Election {
             });
         }
 
-        option_ratings.sort_by(|a, b| a.rating.cmp(&b.rating));
+        // Apply modifiers
+        for option in &mut option_ratings {
+            let modifier = match self.options[option.option_index] {
+                ElectionOption::MakeFarm(_) => attributes.voter.food_care,
+                ElectionOption::MakeRz => attributes.voter.reproductive_care,
+                ElectionOption::MoneyHole => attributes.voter.money_care,
+                ElectionOption::Mint => attributes.voter.money_care,
+            };
 
-        match &mut self.election_type {
-            ElectionType::FirstPastThePost(election) => election.vote(&option_ratings),
+            option.rating = (option.rating as f32 * modifier) as i32;
         }
+
+        option_ratings.sort_by(|a, b| a.rating.cmp(&b.rating).reverse());
+
+        self.election_type.vote(&option_ratings);
     }
 }
 
@@ -217,8 +294,9 @@ pub fn start_election_system(
         return;
     }
 
-    let election = match rng.inner.gen_range(0..1) {
+    let election = match rng.inner.gen_range(0..2) {
         0 => ElectionType::FirstPastThePost(FirstPastThePost::default()),
+        1 => ElectionType::Approval(Approval::default()),
         _ => panic!("invalid election type"),
     };
 
@@ -250,9 +328,7 @@ pub fn close_elections_system(
 
         let options = election.options.clone();
 
-        let result = match &election.election_type {
-            ElectionType::FirstPastThePost(x) => x.result(&options),
-        };
+        let result = election.election_type.result(&options);
 
         match result.get_winner() {
             ElectionOption::MakeFarm(food_template) => Building::Farm(food_template.clone()).build(
@@ -267,6 +343,12 @@ pub fn close_elections_system(
                 &mut plots,
                 &mut rng.inner,
             ),
+            ElectionOption::MoneyHole => {
+                Building::MoneyHole.build(&mut commands, &asset_server, &mut plots, &mut rng.inner)
+            }
+            ElectionOption::Mint => {
+                Building::Mint.build(&mut commands, &asset_server, &mut plots, &mut rng.inner)
+            }
         };
 
         election_history.results.push(ElectionResult {
@@ -356,7 +438,7 @@ fn get_options(
 
     let voter_count = query.iter().count();
 
-    let option_count = want_count.min(6).min(voter_count);
+    let option_count = want_count.min(3).min(voter_count);
 
     let mut options = HashSet::new();
 
@@ -383,11 +465,10 @@ fn get_options(
         options.insert(option);
     }
 
-    if options.is_empty() {
-        options.insert(ElectionOption::MakeFarm(
-            food_collection.foods.choose(rng).unwrap().clone(),
-        ));
-    }
+    let mut result: Vec<ElectionOption> = options.into_iter().collect();
 
-    options.into_iter().collect()
+    result.push(ElectionOption::MoneyHole);
+    result.push(ElectionOption::Mint);
+
+    result
 }

@@ -83,12 +83,14 @@ impl Food {
 #[derive(Debug, Component)]
 pub struct FoodPreferences {
     pub wont_eat: HashSet<FoodGroup>,
+    pub prefers: HashSet<FoodGroup>,
 }
 
 impl FoodPreferences {
-    pub fn new(wont_eat: &[FoodGroup]) -> Self {
+    pub fn new(wont_eat: &[FoodGroup], prefers: &[FoodGroup]) -> Self {
         Self {
             wont_eat: wont_eat.iter().map(|i| *i).collect(),
+            prefers: prefers.iter().map(|i| *i).collect(),
         }
     }
 

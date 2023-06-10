@@ -12,6 +12,7 @@ use bevy_common_assets::toml::TomlAssetPlugin;
 use bevy_enum_filter::prelude::*;
 use building::BuildingPlots;
 use rand::Rng;
+use world_stats::WorldStats;
 
 mod age;
 mod assets;
@@ -28,6 +29,7 @@ mod hunger;
 mod info;
 mod mint;
 mod money;
+mod money_hole;
 mod movement;
 mod name;
 mod people;
@@ -38,6 +40,8 @@ mod sim_setup;
 mod stats;
 mod text;
 mod ui;
+mod upkeep;
+mod world_stats;
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let food_collection = FoodCollectionHandle(asset_server.load(assets::FOOD_CONFIG_FILE));
@@ -72,6 +76,7 @@ fn main() {
 
     App::new()
         .add_enum_filter::<building::BuildingStatus>()
+        .add_enum_filter::<goals::Goals>()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: "VotingVotingVoting".into(),
@@ -100,6 +105,7 @@ fn main() {
         .insert_resource(elections::election::ElectionHistory::default())
         .insert_resource(BuildingPlots::new())
         .insert_resource(money::Treasury::new())
+        .insert_resource(WorldStats::new())
         .add_plugin(rng::RngPlugin::with_seed(rng::Seed::Number(seed)))
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_plugin(stats::StatsPlugin)
@@ -144,8 +150,10 @@ fn main() {
             farm::update_farm_tint_system.in_set(LifeSet::World),
             mint::mints_have_become_dilapidated_system.in_set(LifeSet::World),
             mint::mint_produce_system.in_set(LifeSet::World),
-            money::upkeep_cost_system.in_set(LifeSet::World),
+            upkeep::upkeep_cost_system.in_set(LifeSet::World),
             building::change_building_status_system.in_set(LifeSet::World),
+            money_hole::update_treasury_capacity_system.in_set(LifeSet::World),
+            world_stats::world_stats_update_system.in_set(LifeSet::World),
         ))
         .add_systems(
             (people::create_grave_system, death::remove_dead_system)

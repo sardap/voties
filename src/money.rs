@@ -5,11 +5,23 @@ pub type Money = f64;
 #[derive(Debug, Resource)]
 pub struct Treasury {
     pub money: Money,
+    pub capacity: Money,
 }
 
 impl Treasury {
     pub fn new() -> Self {
-        Self { money: 0.0 }
+        Self {
+            money: 0.0,
+            capacity: 0.0,
+        }
+    }
+
+    pub fn change_capacity(&mut self, new_capacity: Money) {
+        self.capacity = new_capacity;
+
+        if self.money > self.capacity {
+            self.money = self.capacity;
+        }
     }
 
     pub fn spend(&mut self, amount: Money) -> bool {
@@ -24,35 +36,12 @@ impl Treasury {
     pub fn add(&mut self, amount: Money) {
         self.money += amount;
     }
-}
 
-#[derive(Debug, Clone, Component, Default)]
-pub struct UpkeepCost {
-    pub cost_per_second: Money,
-    pub upkeep_lapsed: bool,
-}
-
-impl UpkeepCost {
-    pub fn new(cost_per_second: Money) -> Self {
-        Self {
-            cost_per_second,
-            upkeep_lapsed: false,
-        }
+    pub fn get_capacity(&self) -> Money {
+        self.capacity
     }
-}
 
-pub fn upkeep_cost_system(
-    time: Res<Time>,
-    mut treasury: ResMut<Treasury>,
-    mut query: Query<&mut UpkeepCost>,
-) {
-    for mut upkeep_cost in &mut query {
-        let amount = upkeep_cost.cost_per_second * time.delta_seconds_f64();
-
-        let updated_value = !treasury.spend(amount);
-
-        if updated_value != upkeep_cost.upkeep_lapsed {
-            upkeep_cost.upkeep_lapsed = updated_value;
-        }
+    pub fn get_filled_percentage(&self) -> f32 {
+        (self.money / self.capacity) as f32
     }
 }

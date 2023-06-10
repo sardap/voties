@@ -8,9 +8,11 @@ use crate::{
     building::{Building, BuildingPlots},
     death,
     elections::voting_center::VotingCenterBundle,
-    hunger, mint, name,
+    hunger, mint, money_hole, name,
     people::{self, create_person},
-    rng, AppState,
+    rng,
+    upkeep::setup_upkeep,
+    AppState,
 };
 
 pub fn setting_up_world(
@@ -23,6 +25,8 @@ pub fn setting_up_world(
     time: Res<Time>,
     mut name_gen: ResMut<name::NameGenerator>,
 ) {
+    setup_upkeep(&mut commands);
+
     create_starting_farms(
         &mut commands,
         &asset_server,
@@ -44,6 +48,8 @@ pub fn setting_up_world(
     create_voting_center(&mut commands, &asset_server);
 
     crete_starting_mints(&mut commands, &asset_server, &mut plots, &mut rng.inner);
+
+    create_starting_money_hole(&mut commands, &asset_server, &mut plots, &mut rng.inner);
 
     state.set(AppState::SettingUpUi);
 }
@@ -96,9 +102,10 @@ fn create_starting_people(
         let speed = rng.gen_range(MIN_SPEED..MAX_SPEED);
 
         let food_group_count = people::wont_eat_count(rng);
-        let mut food_groups = HashSet::new();
-        people::fill_wont_eat(food_group_count, &mut food_groups, rng);
-        let food_groups = food_groups.into_iter().collect::<Vec<_>>();
+        let mut wont_eat = HashSet::new();
+        people::fill_wont_eat(food_group_count, &mut wont_eat, rng);
+        let prefer_eat_groups = people::create_prefer_eat(rng, &wont_eat, None);
+        let wont_eat_food_groups = wont_eat.into_iter().collect::<Vec<_>>();
 
         let spawn_location = Vec3::new(
             rng.gen_range(-300.0..300.0),
@@ -116,7 +123,8 @@ fn create_starting_people(
             (MIN_STOMACH_SIZE_ML.clone(), MAX_STOMACH_SIZE_ML.clone()),
             speed,
             age,
-            &food_groups,
+            &wont_eat_food_groups,
+            &prefer_eat_groups,
         );
     }
 }
@@ -134,9 +142,29 @@ fn crete_starting_mints(
     plots: &mut BuildingPlots,
     rng: &mut impl rand::Rng,
 ) {
-    let amount = rng.gen_range(400.0..600.0);
+    let amount = rng.gen_range(mint::MINT_MPS_MIN..mint::MINT_MPS_MAX);
 
     for _ in 0..1 {
-        mint::MintBundle::spawn(commands, asset_server, amount, plots.next());
+        mint::spawn(
+            commands,
+            asset_server,
+            amount,
+            Duration::from_secs(1),
+            plots.next(),
+        );
+    }
+}
+
+fn create_starting_money_hole(
+    commands: &mut Commands,
+    asset_server: &AssetServer,
+    plots: &mut BuildingPlots,
+    rng: &mut impl rand::Rng,
+) {
+    let storage_capacity =
+        rng.gen_range(money_hole::MONEY_HOLE_CAPACITY_MIN..money_hole::MONEY_HOLE_CAPACITY_MAX);
+
+    for _ in 0..1 {
+        money_hole::spawn(commands, asset_server, storage_capacity, plots.next());
     }
 }

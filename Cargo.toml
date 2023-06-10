@@ -19,9 +19,11 @@ opt-level = 3
 [dependencies]
 bevy = "0.10.1"
 bevy_common_assets = { version = "0.6.0", features = ["toml", "serde_toml", "rmp-serde", "msgpack"] }
-bevy_enum_filter = {path = "../bevy_enum_filter"}
+bevy_enum_filter = { git = "https://github.com/MrGVSV/bevy_enum_filter.git", branch = "main" }
+enum-iterator = "1.4.1"
 lazy_static = "1.4.0"
 measurements = "0.11.0"
+num-traits = "0.2.15"
 rand = { version = "0.8.5", features = ["small_rng"] }
 rand_xoshiro = "0.6.0"
 serde = "1.0.163"

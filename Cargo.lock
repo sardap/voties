@@ -484,6 +484,7 @@ dependencies = [
 [[package]]
 name = "bevy_enum_filter"
 version = "0.1.1"
+source = "git+https://github.com/MrGVSV/bevy_enum_filter.git?branch=main#b082faa370f4df4b0469998c3dab83a7d5b8d2cb"
 dependencies = [
  "bevy_app",
  "bevy_ecs",
@@ -493,6 +494,7 @@ dependencies = [
 [[package]]
 name = "bevy_enum_filter_derive"
 version = "0.1.0"
+source = "git+https://github.com/MrGVSV/bevy_enum_filter.git?branch=main#b082faa370f4df4b0469998c3dab83a7d5b8d2cb"
 dependencies = [
  "convert_case",
  "proc-macro-crate",
@@ -1382,6 +1384,26 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
+]
+
+[[package]]
+name = "enum-iterator"
+version = "1.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7add3873b5dd076766ee79c8e406ad1a472c385476b9e38849f8eec24f1be689"
+dependencies = [
+ "enum-iterator-derive",
+]
+
+[[package]]
+name = "enum-iterator-derive"
+version = "1.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eecf8589574ce9b895052fa12d69af7a233f99e6107f5cb8dd1044f2a17bfdcb"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.16",
 ]
 
 [[package]]
@@ -3158,8 +3180,10 @@ dependencies = [
  "bevy",
  "bevy_common_assets",
  "bevy_enum_filter",
+ "enum-iterator",
  "lazy_static",
  "measurements",
+ "num-traits",
  "rand",
  "rand_xoshiro",
  "serde",

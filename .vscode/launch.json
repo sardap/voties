@@ -8,7 +8,7 @@
 			"type": "lldb",
 			"request": "launch",
 			"name": "Launch Backend",
-			"program": "${workspaceFolder}/target/debug/votingvotingvoting.exe",
+			"program": "${workspaceFolder}/target/debug/voties.exe",
 			"args": [],
 			"cwd": "${workspaceFolder}",
 			"env": {

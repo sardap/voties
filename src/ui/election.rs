@@ -41,14 +41,32 @@ pub fn setup(commands: &mut Commands, asset_server: &AssetServer) {
                 .with_children(|parent| {
                     parent
                         .spawn(TextBundle {
-                            text: Text::from_sections(vec![TextSection::new(
-                                "Election: NAME",
-                                TextStyle {
-                                    font: asset_server.load(assets::DEFAULT_FONT_PATH),
-                                    font_size: 20.0,
-                                    color: Color::BLACK,
-                                },
-                            )])
+                            text: Text::from_sections(vec![
+                                TextSection::new(
+                                    "ELECTION TYPE",
+                                    TextStyle {
+                                        font: asset_server.load(assets::DEFAULT_FONT_PATH),
+                                        font_size: 20.0,
+                                        color: Color::BLACK,
+                                    },
+                                ),
+                                TextSection::new(
+                                    ":",
+                                    TextStyle {
+                                        font: asset_server.load(assets::DEFAULT_FONT_PATH),
+                                        font_size: 20.0,
+                                        color: Color::BLACK,
+                                    },
+                                ),
+                                TextSection::new(
+                                    "NAME",
+                                    TextStyle {
+                                        font: asset_server.load(assets::DEFAULT_FONT_PATH),
+                                        font_size: 20.0,
+                                        color: Color::BLACK,
+                                    },
+                                ),
+                            ])
                             .with_alignment(TextAlignment::Center),
                             ..default()
                         })
@@ -200,7 +218,10 @@ pub fn update_election_status_system(
         };
 
         let title = election_title.sections.get_mut(0).unwrap();
-        title.value = format!("Election: {}", election.name);
+        title.value = election.election_type.clone();
+
+        let name = election_title.sections.get_mut(2).unwrap();
+        name.value = election.name.clone();
     }
 
     {

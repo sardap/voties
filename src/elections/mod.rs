@@ -1,3 +1,4 @@
+pub mod approval;
 pub mod election;
 pub mod first_pass_the_post;
 pub mod voter;
