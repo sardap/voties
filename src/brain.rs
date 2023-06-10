@@ -1,7 +1,11 @@
 use bevy::prelude::*;
+use bevy_enum_filter::prelude::*;
 
 use crate::{
-    elections::election::Election, energy::Energy, goals, hunger::Stomach,
+    elections::election::Election,
+    energy::Energy,
+    goals::{self, Goals},
+    hunger::Stomach,
     reproduction::Reproductive,
 };
 
@@ -9,7 +13,7 @@ use crate::{
 pub struct Brain;
 
 fn do_election_goal(
-    commands: &mut Commands,
+    goal: &mut Goals,
     entity: Entity,
     elections: &Query<(Entity, &Election)>,
 ) -> bool {
@@ -18,9 +22,7 @@ fn do_election_goal(
             continue;
         }
 
-        commands
-            .entity(entity)
-            .insert(goals::Vote::new(election_entity));
+        *goal = Goals::Vote(goals::Vote::new(election_entity));
         return true;
     }
 
@@ -28,41 +30,38 @@ fn do_election_goal(
 }
 
 pub fn decide_system(
-    mut commands: Commands,
     time: Res<Time>,
-    query: Query<
-        (Entity, &Energy, Option<&Stomach>, Option<&Reproductive>),
+    mut query: Query<
         (
-            With<Brain>,
-            Without<goals::Reproducing>,
-            Without<goals::Hungry>,
-            Without<goals::Wander>,
-            Without<goals::Vote>,
+            Entity,
+            &mut Goals,
+            &Energy,
+            Option<&Stomach>,
+            Option<&Reproductive>,
         ),
+        (With<Brain>, With<Enum!(goals::Goals::None)>),
     >,
     elections: Query<(Entity, &Election)>,
 ) {
-    for (entity, energy, stomach, reproductive) in &query {
-        if do_election_goal(&mut commands, entity, &elections) {
+    for (entity, mut goal, energy, stomach, reproductive) in &mut query {
+        if do_election_goal(&mut goal, entity, &elections) {
             continue;
         }
 
         if let Some(stomach) = stomach {
             if energy.current_kcal <= 100.0 && stomach.percent_filled() <= 0.8 {
-                commands.entity(entity).insert(goals::Hungry::default());
+                *goal = Goals::Hungry(default());
                 continue;
             }
         }
 
         if let Some(reproductive) = reproductive {
             if energy.current_kcal >= 1500.0 && reproductive.next_reproduction < time.elapsed() {
-                commands
-                    .entity(entity)
-                    .insert(goals::Reproducing::default());
+                *goal = Goals::Reproduce(default());
                 continue;
             }
         }
 
-        commands.entity(entity).insert(goals::Wander::default());
+        *goal = Goals::Wander(default());
     }
 }

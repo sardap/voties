@@ -5,6 +5,8 @@ use std::hash::Hash;
 use std::{collections::HashSet, ops::Sub};
 use strum_macros::EnumIter;
 
+use crate::money::Money;
+
 #[derive(Component)]
 pub struct Stomach {
     pub max_size_ml: f64,
@@ -50,6 +52,20 @@ pub enum FoodGroup {
 
 impl Eq for FoodGroup {}
 
+impl FoodGroup {
+    pub fn upkeep_multiplier(&self) -> f64 {
+        match self {
+            FoodGroup::Fruit => 0.4,
+            FoodGroup::Vegetable => 0.6,
+            FoodGroup::Grain => 0.1,
+            FoodGroup::Meat => 2.0,
+            FoodGroup::Dairy => 0.8,
+            FoodGroup::Fat => 0.8,
+            FoodGroup::Sugar => 0.5,
+        }
+    }
+}
+
 #[derive(Debug, Component, Clone, Default, PartialEq)]
 pub struct Food {
     pub kcal: f64,
@@ -67,12 +83,14 @@ impl Food {
 #[derive(Debug, Component)]
 pub struct FoodPreferences {
     pub wont_eat: HashSet<FoodGroup>,
+    pub prefers: HashSet<FoodGroup>,
 }
 
 impl FoodPreferences {
-    pub fn new(wont_eat: &[FoodGroup]) -> Self {
+    pub fn new(wont_eat: &[FoodGroup], prefers: &[FoodGroup]) -> Self {
         Self {
             wont_eat: wont_eat.iter().map(|i| *i).collect(),
+            prefers: prefers.iter().map(|i| *i).collect(),
         }
     }
 
@@ -119,6 +137,16 @@ impl FoodTemplate {
             ml: self.ml * 5.0,
             groups: self.groups.clone(),
         }
+    }
+
+    pub fn upkeep_cost(&self) -> Money {
+        let multiplier = self
+            .groups
+            .iter()
+            .map(|i| i.upkeep_multiplier())
+            .sum::<f64>();
+
+        self.ml * multiplier
     }
 }
 

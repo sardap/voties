@@ -1,8 +1,6 @@
-use bevy::prelude::*;
-
 use super::{
     election::{ElectionImpl, ElectionOption, ElectionTypeResult},
-    voting_methods::{OptionRating, SingleOptionBallot, VotingMethod},
+    voting_methods::{vote_bundle, OptionRating, SingleOptionBallot, VoteBundle, VotingMethod},
 };
 
 #[derive(Debug)]
@@ -15,12 +13,12 @@ pub struct FirstPastThePostTally {
 pub struct FirstPastThePostResult {
     pub winner: ElectionOption,
     pub total_votes: usize,
-    pub tallies: Vec<FirstPastThePostTally>,
+    pub vote_bundle: Vec<VoteBundle<SingleOptionBallot>>,
 }
 
 #[derive(Debug, Clone, Default)]
 pub struct FirstPastThePost {
-    votes: Vec<SingleOptionBallot>,
+    pub votes: Vec<SingleOptionBallot>,
 }
 
 impl ElectionImpl for FirstPastThePost {
@@ -29,25 +27,12 @@ impl ElectionImpl for FirstPastThePost {
     }
 
     fn result(&self, options: &[ElectionOption]) -> ElectionTypeResult {
-        let mut tallies = options
-            .iter()
-            .enumerate()
-            .map(|(option_index, option)| FirstPastThePostTally {
-                option: option.clone(),
-                votes: self
-                    .votes
-                    .iter()
-                    .filter(|vote| vote.voted_for == option_index)
-                    .count(),
-            })
-            .collect::<Vec<_>>();
-
-        tallies.sort_by(|a, b| b.votes.cmp(&a.votes));
+        let bundles = vote_bundle(&self.votes);
 
         ElectionTypeResult::FirstPastThePostResult(FirstPastThePostResult {
-            winner: tallies.first().unwrap().option.clone(),
+            winner: options[bundles.iter().next().unwrap().ballot.voted_for].clone(),
+            vote_bundle: bundles,
             total_votes: self.votes.len(),
-            tallies,
         })
     }
 }

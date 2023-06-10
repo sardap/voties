@@ -5,32 +5,37 @@ use lazy_static::lazy_static;
 use rand::seq::SliceRandom;
 
 use crate::{
+    building::{Building, BuildingPlots},
     death,
     elections::voting_center::VotingCenterBundle,
-    farm::{self},
-    hunger, name,
+    hunger, mint, money_hole, name,
     people::{self, create_person},
-    reproduction::ReproductiveZoneBundle,
-    rng, AppState,
+    rng,
+    upkeep::setup_upkeep,
+    AppState,
 };
 
 pub fn setting_up_world(
     mut commands: Commands,
     mut state: ResMut<NextState<AppState>>,
     mut rng: ResMut<rng::Rng>,
+    mut plots: ResMut<BuildingPlots>,
     food_collection: Res<hunger::FoodCollection>,
     asset_server: Res<AssetServer>,
     time: Res<Time>,
     mut name_gen: ResMut<name::NameGenerator>,
 ) {
+    setup_upkeep(&mut commands);
+
     create_starting_farms(
         &mut commands,
         &asset_server,
+        &mut plots,
         &mut rng.inner,
         &food_collection,
     );
 
-    create_reproductive_zone(&mut commands, &asset_server);
+    create_reproductive_zone(&mut commands, &asset_server, &mut plots, &mut rng.inner);
 
     create_starting_people(
         &mut commands,
@@ -42,34 +47,35 @@ pub fn setting_up_world(
 
     create_voting_center(&mut commands, &asset_server);
 
+    crete_starting_mints(&mut commands, &asset_server, &mut plots, &mut rng.inner);
+
+    create_starting_money_hole(&mut commands, &asset_server, &mut plots, &mut rng.inner);
+
     state.set(AppState::SettingUpUi);
 }
 
 fn create_starting_farms(
     commands: &mut Commands,
     asset_server: &AssetServer,
+    plots: &mut BuildingPlots,
     rng: &mut impl rand::Rng,
     food_collection: &hunger::FoodCollection,
 ) {
-    for i in 0..2 {
+    for _ in 0..2 {
         let produces = food_collection.foods.choose(rng).unwrap().clone();
 
-        farm::create_farm(
-            commands,
-            asset_server,
-            produces,
-            Vec3::new(i as f32 * 150.0, 120.0, 0.0),
-            rng,
-        );
+        Building::Farm(produces.clone()).build(commands, asset_server, plots, rng);
     }
 }
 
-fn create_reproductive_zone(commands: &mut Commands, asset_server: &AssetServer) {
-    for i in 0..1 {
-        commands.spawn(ReproductiveZoneBundle::new(
-            &asset_server,
-            Vec2::new((i + 1) as f32 * -150.0, 120.0),
-        ));
+fn create_reproductive_zone(
+    commands: &mut Commands,
+    asset_server: &AssetServer,
+    plots: &mut BuildingPlots,
+    rng: &mut impl rand::Rng,
+) {
+    for _ in 0..1 {
+        Building::ReproductiveZone.build(commands, asset_server, plots, rng);
     }
 }
 
@@ -96,9 +102,10 @@ fn create_starting_people(
         let speed = rng.gen_range(MIN_SPEED..MAX_SPEED);
 
         let food_group_count = people::wont_eat_count(rng);
-        let mut food_groups = HashSet::new();
-        people::fill_wont_eat(food_group_count, &mut food_groups, rng);
-        let food_groups = food_groups.into_iter().collect::<Vec<_>>();
+        let mut wont_eat = HashSet::new();
+        people::fill_wont_eat(food_group_count, &mut wont_eat, rng);
+        let prefer_eat_groups = people::create_prefer_eat(rng, &wont_eat, None);
+        let wont_eat_food_groups = wont_eat.into_iter().collect::<Vec<_>>();
 
         let spawn_location = Vec3::new(
             rng.gen_range(-300.0..300.0),
@@ -116,7 +123,8 @@ fn create_starting_people(
             (MIN_STOMACH_SIZE_ML.clone(), MAX_STOMACH_SIZE_ML.clone()),
             speed,
             age,
-            &food_groups,
+            &wont_eat_food_groups,
+            &prefer_eat_groups,
         );
     }
 }
@@ -126,4 +134,37 @@ fn create_voting_center(commands: &mut Commands, asset_server: &AssetServer) {
         asset_server,
         Vec3::new(0.0, 0.0, 0.0),
     ));
+}
+
+fn crete_starting_mints(
+    commands: &mut Commands,
+    asset_server: &AssetServer,
+    plots: &mut BuildingPlots,
+    rng: &mut impl rand::Rng,
+) {
+    let amount = rng.gen_range(mint::MINT_MPS_MIN..mint::MINT_MPS_MAX);
+
+    for _ in 0..1 {
+        mint::spawn(
+            commands,
+            asset_server,
+            amount,
+            Duration::from_secs(1),
+            plots.next(),
+        );
+    }
+}
+
+fn create_starting_money_hole(
+    commands: &mut Commands,
+    asset_server: &AssetServer,
+    plots: &mut BuildingPlots,
+    rng: &mut impl rand::Rng,
+) {
+    let storage_capacity =
+        rng.gen_range(money_hole::MONEY_HOLE_CAPACITY_MIN..money_hole::MONEY_HOLE_CAPACITY_MAX);
+
+    for _ in 0..1 {
+        money_hole::spawn(commands, asset_server, storage_capacity, plots.next());
+    }
 }

@@ -1,17 +1,18 @@
 use std::time::Duration;
 
 use bevy::prelude::*;
+use bevy_enum_filter::prelude::*;
 
 use crate::{
-    assets, collision,
+    assets, building, collision,
     hunger::{self, FoodTemplate},
+    upkeep,
 };
 
 #[derive(Component, Clone, Default)]
 pub struct Farm {
     pub surplus: i32,
-    pub production_time: Duration,
-    pub time_spent_producing: Duration,
+    pub production_timer: Timer,
 }
 
 impl Farm {
@@ -28,45 +29,12 @@ impl Farm {
     }
 }
 
-#[derive(Bundle, Clone, Default)]
-pub struct FarmBundle {
-    pub farm: Farm,
-    pub produces: hunger::Food,
-    pub collider: collision::Collider,
-    #[bundle]
-    pub sprite: SpriteBundle,
-}
-
-#[derive(Component, Clone, Default)]
-pub struct FarmText;
-
-#[derive(Bundle, Clone, Default)]
-pub struct FarmTextBundle {
-    pub farm_text: FarmText,
-    #[bundle]
-    pub text2d: Text2dBundle,
-}
-
 struct ProductionRange {
     min: Duration,
     max: Duration,
 }
 
 impl ProductionRange {
-    fn from_secs(min: u64, max: u64) -> Self {
-        Self {
-            min: Duration::from_secs(min),
-            max: Duration::from_secs(max),
-        }
-    }
-
-    fn from_millis(min: u64, max: u64) -> Self {
-        Self {
-            min: Duration::from_millis(min),
-            max: Duration::from_millis(max),
-        }
-    }
-
     fn new(min: Duration, max: Duration) -> Self {
         Self { min, max }
     }
@@ -82,32 +50,59 @@ fn get_production_time_range(difficulty: u64) -> ProductionRange {
     ProductionRange::new(min, max)
 }
 
+#[derive(Bundle, Clone, Default)]
+pub struct FarmBundle {
+    pub farm: Farm,
+    pub produces: hunger::Food,
+    pub collider: collision::Collider,
+    pub building_status: building::BuildingStatus,
+    pub upkeep: upkeep::UpkeepCost,
+    #[bundle]
+    pub sprite: SpriteBundle,
+}
+
+#[derive(Component, Clone, Default)]
+pub struct FarmText;
+
+#[derive(Bundle, Clone, Default)]
+pub struct FarmTextBundle {
+    pub farm_text: FarmText,
+    #[bundle]
+    pub text2d: Text2dBundle,
+}
+
 pub fn create_farm(
     commands: &mut Commands,
     asset_server: &AssetServer,
     produces: FoodTemplate,
-    location: Vec3,
+    location: Vec2,
     rng: &mut impl rand::Rng,
 ) {
+    let upkeep_cost = produces.upkeep_cost();
+
     let production_range = get_production_time_range(produces.difficulty as u64);
     let production_time = rng.gen_range(production_range.min..production_range.max);
     let farm_name = format!(
-        "{} Farm - {} seconds",
+        "{} Farm - {:.2}/s ${:.2}/s",
         produces.name,
-        production_time.as_secs()
+        production_time.as_secs_f32(),
+        upkeep_cost
     );
 
     let farm_id = commands
         .spawn(FarmBundle {
+            upkeep: upkeep::UpkeepCost::new(upkeep_cost),
             farm: Farm {
-                production_time,
                 surplus: 0,
-                time_spent_producing: Duration::ZERO,
+                production_timer: Timer::from_seconds(
+                    production_time.as_secs_f32(),
+                    TimerMode::Repeating,
+                ),
             },
             produces: produces.into(),
             sprite: SpriteBundle {
                 texture: asset_server.load(crate::assets::DEFAULT_FARM_SPRITE_PATH),
-                transform: Transform::from_translation(location),
+                transform: Transform::from_translation(Vec3::new(location.x, location.y, 0.0)),
                 ..default()
             },
             ..default()
@@ -135,14 +130,32 @@ pub fn create_farm(
     commands.entity(farm_id).add_child(text_id);
 }
 
-pub fn farms_make_food_system(time: Res<Time>, mut query: Query<&mut Farm>) {
+pub fn farms_make_food_system(
+    time: Res<Time>,
+    mut query: Query<&mut Farm, With<Enum!(building::BuildingStatus::Operational)>>,
+) {
     for mut farm in query.iter_mut() {
-        let mut time_spent_producing = farm.time_spent_producing;
-        time_spent_producing += time.delta();
-        while time_spent_producing >= farm.production_time {
-            time_spent_producing -= farm.production_time;
+        if farm.production_timer.tick(time.delta()).just_finished() {
+            // TODO make text float up
             farm.surplus += 1;
         }
-        farm.time_spent_producing = time_spent_producing;
+    }
+}
+
+pub fn update_farm_tint_system(
+    mut query: Query<
+        (&mut Sprite, &building::BuildingStatus),
+        (With<Farm>, Changed<building::BuildingStatus>),
+    >,
+) {
+    for (mut farm, status) in query.iter_mut() {
+        match status {
+            building::BuildingStatus::Operational => {
+                farm.color = Color::WHITE;
+            }
+            building::BuildingStatus::Dilapidated => {
+                farm.color = Color::RED;
+            }
+        }
     }
 }

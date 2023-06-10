@@ -1,28 +1,32 @@
 use std::time::Duration;
 
 use bevy::prelude::*;
+use bevy_enum_filter::prelude::*;
 use rand::Rng;
 
 use crate::{
     collision,
-    elections::election::{Election, VoterAttributes},
+    elections::{
+        election::{Election, VoterAttributes},
+        voter::Voter,
+    },
     energy::{self, Energy},
     farm,
     hunger::{self, FoodPreferences},
     movement,
     reproduction::{self, Reproductive},
-    rng,
+    rng, world_stats,
 };
 
 #[derive(Debug, PartialEq, Clone)]
-struct EatingState {
+pub struct EatingState {
     food: hunger::Food,
     start_time: Duration,
     count: f64,
 }
 
 #[derive(Debug, Clone, PartialEq)]
-enum HungryState {
+pub enum HungryState {
     FindingTarget,
     MovingToTarget(Entity),
     Eating(EatingState),
@@ -34,30 +38,105 @@ impl Default for HungryState {
     }
 }
 
-#[derive(Component, Default)]
-pub struct Hungry {
-    state: HungryState,
+#[derive(Debug, Clone, PartialEq)]
+pub struct WaitingAtRzState {
+    start_time: Duration,
+    rz: Entity,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ReproducingState {
+    FindingRZ,
+    MovingToRz(Entity),
+    WaitingAtRz(WaitingAtRzState),
+}
+
+impl Default for ReproducingState {
+    fn default() -> Self {
+        Self::FindingRZ
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum WanderState {
+    FindingTarget,
+    MovingToTarget,
+}
+
+impl Default for WanderState {
+    fn default() -> Self {
+        WanderState::FindingTarget
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum VoteState {
+    FindingVotingCenter,
+    MovingToTarget,
+    AtVotingCenter,
+}
+
+impl Default for VoteState {
+    fn default() -> Self {
+        VoteState::FindingVotingCenter
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Vote {
+    state: VoteState,
+    target_election: Entity,
+}
+
+impl Vote {
+    pub fn new(target_election: Entity) -> Self {
+        Self {
+            state: VoteState::FindingVotingCenter,
+            target_election,
+        }
+    }
+
+    pub fn new_state(&self, state: VoteState) -> Self {
+        Self {
+            state,
+            target_election: self.target_election,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Component, EnumFilter)]
+pub enum Goals {
+    None,
+    Hungry(HungryState),
+    Reproduce(ReproducingState),
+    Wander(WanderState),
+    Vote(Vote),
 }
 
 pub fn step_hunger_goal_system(
-    mut commands: Commands,
     time: Res<Time>,
-    mut person: Query<(
-        Entity,
-        &mut energy::Energy,
-        &mut Hungry,
-        &Transform,
-        Option<&hunger::FoodPreferences>,
-        &mut movement::MovementGoal,
-        &collision::CollisionHolder,
-        &mut hunger::Stomach,
-    )>,
+    mut person: Query<
+        (
+            &mut Goals,
+            &mut energy::Energy,
+            &Transform,
+            Option<&hunger::FoodPreferences>,
+            &mut movement::MovementGoal,
+            &collision::CollisionHolder,
+            &mut hunger::Stomach,
+        ),
+        With<Enum!(Goals::Hungry)>,
+    >,
     mut farms: Query<(Entity, &Transform, &hunger::Food, &mut farm::Farm)>,
 ) {
-    for (entity, mut energy, mut hungry, position, food_pref, mut move_goal, col, mut stomach) in
-        &mut person
+    for (mut goal, mut energy, position, food_pref, mut move_goal, col, mut stomach) in &mut person
     {
-        match hungry.state.clone() {
+        let hungry = match goal.clone() {
+            Goals::Hungry(hungry) => hungry,
+            _ => todo!(),
+        };
+
+        match hungry {
             HungryState::FindingTarget => {
                 let mut closest_farm: Option<(Entity, Vec3)> = None;
                 let mut closest_distance = f32::MAX;
@@ -88,10 +167,10 @@ pub fn step_hunger_goal_system(
                 }
 
                 if let Some((farm_entity, trans)) = closest_farm {
-                    hungry.state = HungryState::MovingToTarget(farm_entity);
+                    *goal = Goals::Hungry(HungryState::MovingToTarget(farm_entity));
                     move_goal.target = Some(trans);
                 } else {
-                    commands.entity(entity).remove::<Hungry>();
+                    *goal = Goals::None;
                     continue;
                 }
             }
@@ -101,7 +180,7 @@ pub fn step_hunger_goal_system(
                     let (_, _, farm_food, mut farm_farm) = match farms.get_mut(target) {
                         Ok(result) => result,
                         Err(_) => {
-                            commands.entity(entity).remove::<Hungry>();
+                            *goal = Goals::None;
                             continue;
                         }
                     };
@@ -109,7 +188,7 @@ pub fn step_hunger_goal_system(
                     // Check will eat food
                     if let Some(food_pref) = food_pref {
                         if !food_pref.will_eat(farm_food) {
-                            commands.entity(entity).remove::<Hungry>();
+                            *goal = Goals::None;
                             continue;
                         }
                     }
@@ -122,11 +201,11 @@ pub fn step_hunger_goal_system(
                         count += 1;
                     }
 
-                    hungry.state = HungryState::Eating(EatingState {
+                    *goal = Goals::Hungry(HungryState::Eating(EatingState {
                         food: farm_food.clone(),
                         start_time: time.elapsed(),
                         count: count as f64,
-                    });
+                    }));
                 }
             }
             HungryState::Eating(eating_state) => {
@@ -137,49 +216,26 @@ pub fn step_hunger_goal_system(
                 if time.elapsed() - eating_state.start_time > time_taken_to_eat {
                     stomach.filled_ml += eating_state.food.ml * eating_state.count;
                     energy.current_kcal += eating_state.food.kcal * eating_state.count;
-                    commands.entity(entity).remove::<Hungry>();
+                    *goal = Goals::None;
                 }
             }
         }
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
-struct WaitingAtRzState {
-    start_time: Duration,
-    rz: Entity,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-enum ReproducingState {
-    FindingRZ,
-    MovingToRz(Entity),
-    WaitingAtRz(WaitingAtRzState),
-}
-
-impl Default for ReproducingState {
-    fn default() -> Self {
-        Self::FindingRZ
-    }
-}
-
-#[derive(Component, Default)]
-pub struct Reproducing {
-    state: ReproducingState,
-}
-
 pub fn step_reproduce_goal_system(
     mut commands: Commands,
     time: Res<Time>,
+    mut rng: ResMut<rng::Rng>,
     mut person: Query<
         (
             Entity,
-            &mut Reproducing,
+            &mut Goals,
             &Transform,
             &mut movement::MovementGoal,
             &collision::CollisionHolder,
         ),
-        With<reproduction::Reproductive>,
+        With<Enum!(Goals::Reproduce)>,
     >,
     mut reproductive_query: Query<&mut reproduction::Reproductive>,
     reproductive_zones_q: Query<(
@@ -189,8 +245,13 @@ pub fn step_reproduce_goal_system(
         &reproduction::ReproductiveZone,
     )>,
 ) {
-    for (entity, mut reproducing, trans, mut move_goal, col) in &mut person {
-        match reproducing.state.clone() {
+    for (entity, mut goal, trans, mut move_goal, col) in &mut person {
+        let reproducing = match goal.clone() {
+            Goals::Reproduce(x) => x,
+            _ => todo!(),
+        };
+
+        match reproducing {
             ReproducingState::FindingRZ => {
                 let mut closest_rz: Option<(Entity, Vec3)> = None;
                 let mut closest_distance = f32::MAX;
@@ -205,25 +266,25 @@ pub fn step_reproduce_goal_system(
                 }
 
                 if let Some((rz_entity, trans)) = closest_rz {
-                    reproducing.state = ReproducingState::MovingToRz(rz_entity);
+                    *goal = Goals::Reproduce(ReproducingState::MovingToRz(rz_entity));
                     move_goal.target = Some(trans);
                 } else {
-                    commands.entity(entity).remove::<Reproducing>();
+                    *goal = Goals::None;
                     continue;
                 }
             }
             ReproducingState::MovingToRz(target) => {
                 // Check RZ reached
                 if col.events.iter().any(|event| event.other == target) {
-                    reproducing.state = ReproducingState::WaitingAtRz(WaitingAtRzState {
+                    *goal = Goals::Reproduce(ReproducingState::WaitingAtRz(WaitingAtRzState {
                         start_time: time.elapsed(),
                         rz: target,
-                    });
+                    }));
                 }
             }
             ReproducingState::WaitingAtRz(waiting) => {
                 if time.elapsed() - waiting.start_time > Duration::from_secs(5) {
-                    commands.entity(entity).remove::<Reproducing>();
+                    *goal = Goals::None;
                     continue;
                 }
 
@@ -233,7 +294,7 @@ pub fn step_reproduce_goal_system(
                 {
                     Ok(result) => result,
                     Err(_) => {
-                        commands.entity(entity).remove::<Reproducing>();
+                        *goal = Goals::None;
                         continue;
                     }
                 };
@@ -244,18 +305,20 @@ pub fn step_reproduce_goal_system(
                         continue;
                     }
 
-                    let next_reproduction_time = time.elapsed() + Duration::from_secs(120);
+                    let next_reproduction_time = time.elapsed() + Duration::from_secs(30);
                     {
                         let mut mate_reproductive = match reproductive_query.get_mut(event.other) {
                             Ok(result) => result,
                             Err(_) => continue,
                         };
-                        mate_reproductive.next_reproduction = next_reproduction_time;
+                        mate_reproductive.next_reproduction = next_reproduction_time
+                            + Duration::from_secs(rng.inner.gen_range(0..30));
                     }
 
                     {
                         let mut reproductive = reproductive_query.get_mut(entity).unwrap();
-                        reproductive.next_reproduction = next_reproduction_time;
+                        reproductive.next_reproduction = next_reproduction_time
+                            + Duration::from_secs(rng.inner.gen_range(0..30));
                     }
 
                     commands.entity(entity).insert(reproduction::Pregnant {
@@ -264,117 +327,96 @@ pub fn step_reproduce_goal_system(
                         pregnancy_duration: Duration::from_secs(10),
                     });
 
-                    commands.entity(entity).remove::<Reproducing>();
-                    commands.entity(event.other).remove::<Reproducing>();
+                    *goal = Goals::None;
+                    // commands.entity(event.other).remove::<Reproducing>();
                 }
             }
         }
     }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum WanderState {
-    FindingTarget,
-    MovingToTarget,
-}
-
-impl Default for WanderState {
-    fn default() -> Self {
-        WanderState::FindingTarget
-    }
-}
-
-#[derive(Debug, Component, Default)]
-pub struct Wander {
-    state: WanderState,
 }
 
 pub fn step_wander_goal_system(
-    mut commands: Commands,
     mut rng: ResMut<rng::Rng>,
-    mut query: Query<(Entity, &mut movement::MovementGoal, &Transform, &mut Wander)>,
+    mut query: Query<
+        (&mut Goals, &mut movement::MovementGoal, &Transform),
+        With<Enum!(Goals::Wander)>,
+    >,
 ) {
-    for (entity, mut movement_goal, position, mut wander) in &mut query {
-        match wander.state {
+    for (mut goal, mut movement_goal, position) in &mut query {
+        let wander = match goal.clone() {
+            Goals::Wander(x) => x,
+            _ => todo!(),
+        };
+
+        match wander {
             WanderState::FindingTarget => {
-                let new_target = Vec3::new(
-                    rng.inner.gen_range(-400.0..400.0),
-                    rng.inner.gen_range(-300.0..300.0),
-                    position.translation.z,
-                );
+                let new_target = position.translation
+                    + Vec3::new(
+                        rng.inner.gen_range(-100.0..100.0),
+                        rng.inner.gen_range(-100.0..100.0),
+                        0.0,
+                    );
                 movement_goal.target = Some(new_target);
-                wander.state = WanderState::MovingToTarget;
+                *goal = Goals::Wander(WanderState::MovingToTarget);
             }
             WanderState::MovingToTarget => {
                 if position.translation.distance(movement_goal.target.unwrap()) < 10.0 {
-                    wander.state = WanderState::FindingTarget;
-                    commands.entity(entity).remove::<Wander>();
+                    *goal = Goals::None;
                 }
             }
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum VoteState {
-    FindingVotingCenter,
-    MovingToTarget,
-    AtVotingCenter,
-}
-
-impl Default for VoteState {
-    fn default() -> Self {
-        VoteState::FindingVotingCenter
-    }
-}
-
-#[derive(Debug, Component)]
-pub struct Vote {
-    state: VoteState,
-    target_election: Entity,
-}
-
-impl Vote {
-    pub fn new(target_election: Entity) -> Self {
-        Self {
-            state: VoteState::FindingVotingCenter,
-            target_election,
         }
     }
 }
 
 pub fn vote_goal_system(
-    mut commands: Commands,
-    mut query: Query<(
-        Entity,
-        &mut movement::MovementGoal,
-        &Transform,
-        &mut Vote,
-        Option<&Energy>,
-        Option<&FoodPreferences>,
-        Option<&Reproductive>,
-    )>,
+    stats: Res<world_stats::WorldStats>,
+    mut query: Query<
+        (
+            Entity,
+            &mut Goals,
+            &mut movement::MovementGoal,
+            &Transform,
+            &Voter,
+            Option<&Energy>,
+            Option<&FoodPreferences>,
+            Option<&Reproductive>,
+        ),
+        With<Enum!(Goals::Vote)>,
+    >,
     mut elections: Query<&mut Election>,
 ) {
-    for (entity, mut movement_goal, position, mut vote, energy, food_preferences, reproductive) in
-        &mut query
+    for (
+        entity,
+        mut goal,
+        mut movement_goal,
+        position,
+        voter,
+        energy,
+        food_preferences,
+        reproductive,
+    ) in &mut query
     {
+        let vote = match goal.clone() {
+            Goals::Vote(x) => x,
+            _ => todo!(),
+        };
+
         match vote.state {
             VoteState::FindingVotingCenter => {
                 let new_target = Vec3::new(0.0, 0.0, position.translation.z);
                 movement_goal.target = Some(new_target);
-                vote.state = VoteState::MovingToTarget;
+                *goal = Goals::Vote(vote.new_state(VoteState::MovingToTarget));
             }
             VoteState::MovingToTarget => {
                 if position.translation.distance(movement_goal.target.unwrap()) < 10.0 {
-                    vote.state = VoteState::AtVotingCenter;
+                    *goal = Goals::Vote(vote.new_state(VoteState::AtVotingCenter));
                 }
             }
             VoteState::AtVotingCenter => {
                 let mut election = match elections.get_mut(vote.target_election) {
                     Ok(election) => election,
                     Err(_) => {
-                        commands.entity(entity).remove::<Vote>();
+                        *goal = Goals::None;
                         continue;
                     }
                 };
@@ -382,13 +424,15 @@ pub fn vote_goal_system(
                 election.vote(
                     entity,
                     VoterAttributes {
+                        voter,
                         energy,
                         food_preferences,
                         reproductive,
                     },
+                    &stats,
                 );
 
-                commands.entity(entity).remove::<Vote>();
+                *goal = Goals::None;
             }
         }
     }

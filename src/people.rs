@@ -3,7 +3,7 @@ use std::{collections::HashSet, time::Duration};
 use crate::{
     age, assets, brain, collision, death,
     elections::voter::Voter,
-    energy,
+    energy, goals,
     grave::GraveBundle,
     hunger::{self, Stomach},
     movement::{self},
@@ -57,6 +57,39 @@ pub fn fill_wont_eat(
     }
 }
 
+pub fn create_prefer_eat(
+    rng: &mut impl rand::Rng,
+    wont_eat: &HashSet<hunger::FoodGroup>,
+    parents_prefer: Option<&HashSet<hunger::FoodGroup>>,
+) -> Vec<hunger::FoodGroup> {
+    let food_groups: Vec<_> = hunger::FoodGroup::iter().collect();
+    let mut result = HashSet::new();
+
+    while rng.gen::<u32>() % 3 == 0 {
+        let food_group = if let Some(parents) = parents_prefer {
+            if rng.gen::<u32>() % 2 == 0 {
+                Some(parents.iter().choose(rng).unwrap().clone())
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+
+        let food_group = if let Some(food_group) = food_group {
+            food_group
+        } else {
+            food_groups.iter().choose(rng).unwrap().clone()
+        };
+
+        if !wont_eat.contains(&food_group) {
+            result.insert(food_group);
+        }
+    }
+
+    result.into_iter().collect()
+}
+
 pub fn create_person(
     commands: &mut Commands,
     time: &Time,
@@ -68,6 +101,7 @@ pub fn create_person(
     speed: f32,
     age: Duration,
     wont_eat_groups: &[hunger::FoodGroup],
+    prefer_eat_groups: &[hunger::FoodGroup],
 ) {
     let person_entity = commands
         .spawn((
@@ -81,7 +115,7 @@ pub fn create_person(
                 current_kcal: rng.gen_range(1000.0..2500.0),
                 max_kcal: 2500.0,
             },
-            hunger::FoodPreferences::new(wont_eat_groups),
+            hunger::FoodPreferences::new(wont_eat_groups, prefer_eat_groups),
             movement::MovementGoal::default(),
             movement::MovementSpeed(speed),
             movement::Velocity::default(),
@@ -100,9 +134,8 @@ pub fn create_person(
                 )),
             },
         ))
+        .insert((Voter::new_random(rng), goals::Goals::None))
         .id();
-
-    commands.entity(person_entity).insert(Voter);
 
     let info_text = commands
         .spawn(Text2dBundle {
@@ -280,7 +313,7 @@ pub fn give_birth_system(
                 speed = rng.inner.gen_range(min_speed..max_speed);
             }
 
-            let wont_eat_groups: Vec<_>;
+            let wont_eat_groups: HashSet<_>;
             {
                 let parents_food_groups: Vec<_> = pregnant
                     .parents
@@ -315,9 +348,10 @@ pub fn give_birth_system(
                 }
 
                 fill_wont_eat(wont_eat_count, &mut wont_eat, &mut rng.inner);
-
-                wont_eat_groups = wont_eat.into_iter().collect();
+                wont_eat_groups = wont_eat;
             }
+            let prefer_eat = create_prefer_eat(&mut rng.inner, &wont_eat_groups, None);
+            let wont_eat_groups: Vec<_> = wont_eat_groups.into_iter().collect();
 
             energy.use_kcal(1000.0);
 
@@ -335,6 +369,7 @@ pub fn give_birth_system(
                 speed,
                 Duration::ZERO,
                 &wont_eat_groups,
+                &prefer_eat,
             );
 
             commands.entity(entity).remove::<reproduction::Pregnant>();

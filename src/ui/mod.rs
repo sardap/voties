@@ -1,5 +1,6 @@
 pub mod button;
 pub mod election;
+pub mod money;
 pub mod resources;
 
 use bevy::prelude::*;
@@ -26,7 +27,8 @@ pub fn setup(
         .id();
 
     election::setup(&mut commands, &asset_server);
-    resources::setup(root, &mut commands, &asset_server);
+    resources::setup(root, &mut commands);
+    money::setup(&mut commands, &asset_server);
 
     state.set(AppState::Running);
 }
