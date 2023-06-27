@@ -25,8 +25,12 @@ jobs:
         run: mkdir out
       - name: wasm-bindgen
         run: wasm-bindgen --typescript --out-dir ./out --target web ./target/wasm32-unknown-unknown/release/voties.wasm
+      - name: copy assets
+        run: cp -r ./assets ./out
+      - name: webpage
+        run: cp ./.github/workflows/main.html ./out
       - name: Zip output
-        run: zip -r voties_wasm.zip ./out ./assets ./github/workflows/main.html
+        run: cd ./out && zip -r ../voties_wasm.zip . && cd ..
       - name: Release
         uses: softprops/action-gh-release@v1
         with:

@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::money::{Money, Treasury};
+use crate::{
+    money::{Money, Treasury},
+    sim_time::SimTime,
+};
 
 #[derive(Debug, Clone, Component, Default)]
 pub struct UpkeepCost {
@@ -22,18 +25,22 @@ pub struct UpkeepCostTimer(pub Timer);
 
 pub fn upkeep_cost_system(
     time: Res<Time>,
+    sim_time: Res<SimTime>,
     mut upkeep_timer: ResMut<UpkeepCostTimer>,
     mut treasury: ResMut<Treasury>,
     mut query: Query<&mut UpkeepCost>,
 ) {
-    let elapsed = upkeep_timer.0.elapsed_secs() as f64 + time.delta_seconds_f64();
+    let finished_count = upkeep_timer
+        .0
+        .tick(sim_time.delta(&time))
+        .times_finished_this_tick();
 
-    if !upkeep_timer.0.tick(time.delta()).just_finished() {
+    if finished_count == 0 {
         return;
     }
 
     for mut upkeep_cost in &mut query {
-        let amount = upkeep_cost.cost_per_second * elapsed;
+        let amount = upkeep_cost.cost_per_second * finished_count as f64;
 
         let updated_value = !treasury.spend(amount);
 

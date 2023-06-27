@@ -449,7 +449,7 @@ difficulty = 3
 name = "무국 (Muguk)"
 kcal = 50.0
 ml = 150.0
-groups = ["Vegetable"]
+groups = ["Vegetable", "Meat"]
 difficulty = 2
 
 [[foods]]

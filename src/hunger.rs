@@ -6,11 +6,14 @@ use std::{collections::HashSet, ops::Sub};
 use strum_macros::EnumIter;
 
 use crate::money::Money;
+use crate::sim_time::SimTime;
+use crate::world_stats;
 
-#[derive(Component)]
+#[derive(Debug, Component)]
 pub struct Stomach {
     pub max_size_ml: f64,
     pub filled_ml: f64,
+    pub filled_percent: world_stats::Stat<f64>,
 }
 
 impl Default for Stomach {
@@ -18,6 +21,7 @@ impl Default for Stomach {
         Self {
             max_size_ml: 1000.0,
             filled_ml: 500.0,
+            filled_percent: world_stats::Stat::default(),
         }
     }
 }
@@ -27,6 +31,7 @@ impl Stomach {
         Self {
             max_size_ml: max_size.as_milliliters(),
             filled_ml: filled.as_milliliters(),
+            filled_percent: world_stats::Stat::default(),
         }
     }
 
@@ -99,17 +104,24 @@ impl FoodPreferences {
     }
 }
 
-pub fn drain_stomach_system(time: Res<Time>, mut query: Query<&mut Stomach>) {
+pub fn drain_stomach_system(
+    time: Res<Time>,
+    sim_time: Res<SimTime>,
+    mut query: Query<&mut Stomach>,
+) {
     for mut stomach in &mut query {
         let new_value = stomach.filled_ml.sub(
             measurements::Volume::from_milliliters(50.0).as_milliliters()
-                * time.delta_seconds() as f64,
+                * sim_time.delta_seconds(&time) as f64,
         );
         if new_value > 0.0 {
             stomach.filled_ml = new_value;
         } else {
             stomach.filled_ml = 0.0;
         }
+
+        let percent = stomach.filled_ml / stomach.max_size_ml;
+        stomach.filled_percent.push(percent);
     }
 }
 
@@ -140,11 +152,13 @@ impl FoodTemplate {
     }
 
     pub fn upkeep_cost(&self) -> Money {
-        let multiplier = self
+        let mut multiplier = self
             .groups
             .iter()
             .map(|i| i.upkeep_multiplier())
             .sum::<f64>();
+
+        multiplier /= self.groups.len() as f64;
 
         self.ml * multiplier
     }

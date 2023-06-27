@@ -1,14 +1,16 @@
-use std::collections::HashSet;
+use std::{collections::HashSet, ops::Div, time::Duration};
 
 use bevy::prelude::*;
+use enum_iterator::Sequence;
 use rand::Rng;
 
-use crate::{age, energy, rng};
+use crate::{age, energy, rng, shelter, sim_time::SimTime};
 
-#[derive(Debug, PartialEq, Hash)]
+#[derive(Debug, PartialEq, Hash, Copy, Clone, Sequence)]
 pub enum DeathReason {
     Starvation,
     OldAge,
+    Homeliness,
 }
 
 impl DeathReason {
@@ -16,6 +18,7 @@ impl DeathReason {
         match self {
             DeathReason::Starvation => "I am starving".to_string(),
             DeathReason::OldAge => "I am old".to_string(),
+            DeathReason::Homeliness => "I am homeless".to_owned(),
         }
     }
 
@@ -23,6 +26,7 @@ impl DeathReason {
         match self {
             DeathReason::Starvation => "Starved".to_string(),
             DeathReason::OldAge => "Olded to death".to_string(),
+            DeathReason::Homeliness => "Exposure".to_owned(),
         }
     }
 }
@@ -38,6 +42,7 @@ pub struct Mortal {
 
 pub fn death_from_exhaustion_system(
     time: Res<Time>,
+    sim_time: Res<SimTime>,
     mut query: Query<(&mut Mortal, &energy::Energy)>,
 ) {
     for (mut mortal, energy) in &mut query {
@@ -51,7 +56,7 @@ pub fn death_from_exhaustion_system(
             }
 
             let mut depleted_for = mortal.energy_depleted_for.unwrap();
-            depleted_for += time.delta();
+            depleted_for += sim_time.delta(&time);
             if depleted_for > std::time::Duration::from_secs(30) {
                 mortal.dead = Some(DeathReason::Starvation);
             }
@@ -64,18 +69,23 @@ pub fn death_from_exhaustion_system(
     }
 }
 
-pub const OLD_AGE_DEATH_THRESHOLD: std::time::Duration = std::time::Duration::from_secs(500);
+pub const OLD_AGE_DEATH_THRESHOLD: std::time::Duration = std::time::Duration::from_secs(250);
 
 #[derive(Resource)]
 pub struct CheckOldAgeTimer(pub Timer);
 
 pub fn die_of_old_age_system(
     time: Res<Time>,
+    sim_time: Res<SimTime>,
     mut rng: ResMut<rng::Rng>,
     mut timer: ResMut<CheckOldAgeTimer>,
     mut query: Query<(&mut Mortal, &age::Age)>,
 ) {
-    if timer.0.tick(time.delta()).just_finished() {
+    for _ in 0..timer
+        .0
+        .tick(sim_time.delta(&time))
+        .times_finished_this_tick()
+    {
         for (mut mortal, age) in &mut query {
             let death_threshold = OLD_AGE_DEATH_THRESHOLD;
 
@@ -98,9 +108,28 @@ pub fn die_of_old_age_system(
     }
 }
 
+pub fn die_of_homelessness_system(mut query: Query<(&mut Mortal, &shelter::RequiresHouse)>) {
+    for (mut mortal, age) in &mut query {
+        const HOMELINESS_DEATH_THRESHOLD: Duration = Duration::from_secs(40);
+
+        if age.homeless_for < HOMELINESS_DEATH_THRESHOLD / 2 {
+            continue;
+        }
+
+        if !mortal.at_risk.contains(&DeathReason::Homeliness) {
+            mortal.at_risk.insert(DeathReason::Homeliness);
+        }
+
+        if age.homeless_for > HOMELINESS_DEATH_THRESHOLD {
+            mortal.dead = Some(DeathReason::Homeliness);
+        }
+    }
+}
+
 pub fn remove_dead_system(mut commands: Commands, query: Query<(Entity, &Mortal)>) {
     for (entity, mortal) in &query {
-        if mortal.dead.is_some() {
+        if let Some(reason) = &mortal.dead {
+            info!("Removing dead entity which died of {:?} from world", reason);
             commands.entity(entity).despawn_recursive();
         }
     }

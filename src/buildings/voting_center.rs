@@ -14,13 +14,13 @@ pub struct VotingCenterBundle {
 }
 
 impl VotingCenterBundle {
-    pub fn new(asset_server: &AssetServer, location: Vec3) -> Self {
+    pub fn new(asset_server: &AssetServer, location: Vec2) -> Self {
         Self {
             voting_center: VotingCenter,
             collider: collision::Collider::default(),
             sprite: SpriteBundle {
                 texture: asset_server.load(crate::assets::DEFAULT_VOTING_CENTER),
-                transform: Transform::from_translation(location),
+                transform: Transform::from_translation(Vec3::new(location.x, location.y, 0.0)),
                 ..default()
             },
         }

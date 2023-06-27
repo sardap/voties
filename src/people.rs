@@ -4,12 +4,12 @@ use crate::{
     age, assets, brain, collision, death,
     elections::voter::Voter,
     energy, goals,
-    grave::GraveBundle,
     hunger::{self, Stomach},
     movement::{self},
     name,
-    reproduction::{self},
-    rng,
+    reproduction::{self, get_reproduction_cooldown},
+    rng, shelter,
+    sim_time::SimTime,
 };
 use bevy::prelude::*;
 use rand::{seq::IteratorRandom, Rng};
@@ -111,10 +111,7 @@ pub fn create_person(
                 ..default()
             },
             create_person_stomach(rng, stomach_size_range),
-            energy::Energy {
-                current_kcal: rng.gen_range(1000.0..2500.0),
-                max_kcal: 2500.0,
-            },
+            energy::Energy::new(rng.gen_range(1000.0..2500.0), 2500.0),
             hunger::FoodPreferences::new(wont_eat_groups, prefer_eat_groups),
             movement::MovementGoal::default(),
             movement::MovementSpeed(speed),
@@ -128,31 +125,31 @@ pub fn create_person(
             },
             brain::Brain,
             name::Name(name.to_string()),
-            reproduction::Reproductive {
-                next_reproduction: Duration::from_secs(rng.gen_range(
-                    time.elapsed().as_secs()..(time.elapsed() + Duration::from_secs(30)).as_secs(),
-                )),
-            },
+            reproduction::Reproductive::new(get_reproduction_cooldown(rng)),
         ))
-        .insert((Voter::new_random(rng), goals::Goals::None))
+        .insert((
+            Voter::new_random(rng),
+            goals::Goals::None,
+            shelter::RequiresHouse::default(),
+        ))
         .id();
 
-    let info_text = commands
-        .spawn(Text2dBundle {
-            text: Text::from_section(
-                "Example Text",
-                TextStyle {
-                    font: asset_server.load(assets::DEFAULT_FONT_PATH),
-                    font_size: 10.0,
-                    color: Color::BLACK,
-                },
-            ),
-            transform: Transform::from_xyz(0.0, 40.0, 10.0),
-            ..default()
-        })
-        .id();
+    // let info_text = commands
+    //     .spawn(Text2dBundle {
+    //         text: Text::from_section(
+    //             "Example Text",
+    //             TextStyle {
+    //                 font: asset_server.load(assets::DEFAULT_FONT_PATH),
+    //                 font_size: 10.0,
+    //                 color: Color::BLACK,
+    //             },
+    //         ),
+    //         transform: Transform::from_xyz(0.0, 40.0, 10.0),
+    //         ..default()
+    //     })
+    //     .id();
 
-    commands.entity(person_entity).push_children(&[info_text]);
+    // commands.entity(person_entity).push_children(&[info_text]);
 }
 
 #[derive(Debug, Component, Default)]
@@ -173,6 +170,8 @@ pub fn update_info_text(
     >,
     mut q_child: Query<&mut Text>,
 ) {
+    return;
+
     for (mortal, name, children, energy, stomach, age, pregnant) in &q_parent {
         let mut info_text = q_child.get_mut(children[0]).unwrap();
 
@@ -216,29 +215,10 @@ pub fn update_info_text(
     }
 }
 
-pub fn create_grave_system(
-    mut commands: Commands,
-    time: Res<Time>,
-    asset_server: Res<AssetServer>,
-    query: Query<(&death::Mortal, &Transform, &name::Name, &age::Age), With<Person>>,
-) {
-    for (mortal, source_position, name, age) in &query {
-        if let Some(reason) = &mortal.dead {
-            commands.spawn(GraveBundle::new(
-                &asset_server,
-                &source_position,
-                &time,
-                &name.0,
-                reason.get_reason_of_death_message().as_str(),
-                age.duration_alive,
-            ));
-        }
-    }
-}
-
 pub fn give_birth_system(
     mut commands: Commands,
     time: Res<Time>,
+    sim_time: Res<SimTime>,
     asset_server: Res<AssetServer>,
     mut rng: ResMut<rng::Rng>,
     mut name_gen: ResMut<name::NameGenerator>,
@@ -253,15 +233,19 @@ pub fn give_birth_system(
     mut pregnant_q: Query<
         (
             Entity,
-            &reproduction::Pregnant,
+            &mut reproduction::Pregnant,
             &Transform,
             &mut energy::Energy,
         ),
         With<Person>,
     >,
 ) {
-    for (entity, pregnant, trans, mut energy) in &mut pregnant_q {
-        if time.elapsed() - pregnant.pregnant_since > pregnant.pregnancy_duration {
+    for (entity, mut pregnant, trans, mut energy) in &mut pregnant_q {
+        if pregnant
+            .pregnancy_timer
+            .tick(sim_time.delta(&time))
+            .finished()
+        {
             let min_stomach_range;
             let max_stomach_range;
             {

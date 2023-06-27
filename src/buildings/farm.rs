@@ -4,10 +4,13 @@ use bevy::prelude::*;
 use bevy_enum_filter::prelude::*;
 
 use crate::{
-    assets, building, collision,
+    assets, collision,
     hunger::{self, FoodTemplate},
+    sim_time::SimTime,
     upkeep,
 };
+
+use super::building;
 
 #[derive(Component, Clone, Default)]
 pub struct Farm {
@@ -81,7 +84,7 @@ pub fn create_farm(
     let upkeep_cost = produces.upkeep_cost();
 
     let production_range = get_production_time_range(produces.difficulty as u64);
-    let production_time = rng.gen_range(production_range.min..production_range.max);
+    let production_time = rng.gen_range(production_range.min..production_range.max) / 2;
     let farm_name = format!(
         "{} Farm - {:.2}/s ${:.2}/s",
         produces.name,
@@ -132,30 +135,18 @@ pub fn create_farm(
 
 pub fn farms_make_food_system(
     time: Res<Time>,
+    sim_time: Res<SimTime>,
     mut query: Query<&mut Farm, With<Enum!(building::BuildingStatus::Operational)>>,
 ) {
     for mut farm in query.iter_mut() {
-        if farm.production_timer.tick(time.delta()).just_finished() {
-            // TODO make text float up
-            farm.surplus += 1;
-        }
-    }
-}
+        let new_surplus = farm
+            .production_timer
+            .tick(sim_time.delta(&time))
+            .times_finished_this_tick();
 
-pub fn update_farm_tint_system(
-    mut query: Query<
-        (&mut Sprite, &building::BuildingStatus),
-        (With<Farm>, Changed<building::BuildingStatus>),
-    >,
-) {
-    for (mut farm, status) in query.iter_mut() {
-        match status {
-            building::BuildingStatus::Operational => {
-                farm.color = Color::WHITE;
-            }
-            building::BuildingStatus::Dilapidated => {
-                farm.color = Color::RED;
-            }
+        if new_surplus > 0 {
+            // TODO make text float up
+            farm.surplus += new_surplus as i32;
         }
     }
 }

@@ -195,7 +195,7 @@ pub fn update_election_status_system(
             election_type: election.election_type.to_string(),
             open_since: election.time_open,
             options: election.options.iter().map(|x| x.to_string()).collect(),
-            votes: election.voted.len(),
+            votes: election.votes.len(),
         })
         .collect();
     elections.sort_by(|a, b| a.open_since.cmp(&b.open_since));

@@ -3,11 +3,11 @@ use std::collections::HashMap;
 use super::{
     election::{ElectionImpl, ElectionOption, ElectionTypeResult},
     voting_methods::{
-        vote_bundle, MultipleOptionBallot, OptionRating, VoteBundle, VoteCount, VotingMethod,
+        fill, vote_bundle, MultipleOptionBallot, OptionRating, VoteBundle, VoteCount,
     },
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ApprovalResult {
     pub winner: ElectionOption,
     pub total_votes: usize,
@@ -16,17 +16,16 @@ pub struct ApprovalResult {
 }
 
 #[derive(Debug, Clone, Default)]
-pub struct Approval {
-    votes: Vec<MultipleOptionBallot>,
-}
+pub struct Approval;
 
 impl ElectionImpl for Approval {
-    fn vote(&mut self, option_ratings: &[OptionRating]) {
-        self.votes.push(MultipleOptionBallot::fill(option_ratings));
-    }
+    fn result(
+        options: &[ElectionOption],
+        option_ratings: &Vec<&Vec<OptionRating>>,
+    ) -> ElectionTypeResult {
+        let votes = fill::<MultipleOptionBallot>(option_ratings);
 
-    fn result(&self, options: &[ElectionOption]) -> ElectionTypeResult {
-        let bundles = vote_bundle(&self.votes);
+        let bundles = vote_bundle(&votes);
 
         let mut vote_count = HashMap::<usize, i64>::new();
         for i in 0..options.len() {
@@ -52,7 +51,7 @@ impl ElectionImpl for Approval {
 
         ElectionTypeResult::ApprovalResult(ApprovalResult {
             winner: vote_count.iter().next().unwrap().option.clone(),
-            total_votes: self.votes.len(),
+            total_votes: votes.len(),
             vote_count,
             bundles,
         })
