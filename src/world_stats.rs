@@ -1,14 +1,21 @@
 use std::time::Duration;
 
-use bevy::{prelude::*, utils::HashMap};
+use bevy::{ecs::world, prelude::*, utils::HashMap};
 use num_traits::ToPrimitive;
 
-use crate::{building, money};
+use crate::{
+    buildings::{building, house::House},
+    death::DeathReason,
+    elections::voter::Voter,
+    grave::Grave,
+    money,
+    sim_time::SimTime,
+};
 
 // Two election cycles
 const HISTORY_LENGTH: usize = 80;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Stat<T> {
     history: [Option<T>; HISTORY_LENGTH],
 }
@@ -87,7 +94,14 @@ impl<
 
         history.sort_by(|a, b| a.partial_cmp(b).unwrap());
 
-        *history[HISTORY_LENGTH / 2]
+        *history[self.history.len() / 2]
+    }
+
+    pub fn latest(&self) -> T {
+        match self.history[0] {
+            Some(value) => value,
+            None => T::default(),
+        }
     }
 }
 
@@ -127,6 +141,10 @@ impl<T: std::hash::Hash + std::cmp::Eq + std::clone::Clone> Count<T> {
     pub fn max(&self) -> usize {
         *self.map.iter().max_by_key(|(_, count)| *count).unwrap().1
     }
+
+    pub fn sum(&self) -> usize {
+        self.map.iter().map(|(_, count)| *count).sum()
+    }
 }
 
 #[derive(Debug, Resource)]
@@ -135,6 +153,9 @@ pub struct WorldStats {
     pub money: Stat<money::Money>,
     pub hole_filled_capacity: Stat<f64>,
     pub buildings: Count<building::BuildingStatus>,
+    pub houses_filled: Stat<f32>,
+    pub deaths: Count<DeathReason>,
+    pub population: Stat<usize>,
 }
 
 impl WorldStats {
@@ -144,17 +165,28 @@ impl WorldStats {
             money: Stat::default(),
             hole_filled_capacity: Stat::default(),
             buildings: Count::default(),
+            houses_filled: Stat::default(),
+            deaths: Count::default(),
+            population: Stat::default(),
         }
     }
 }
 
 pub fn world_stats_update_system(
     time: Res<Time>,
+    sim_time: Res<SimTime>,
     mut world_stats: ResMut<WorldStats>,
     treasury: Res<money::Treasury>,
     buildings: Query<&building::BuildingStatus>,
+    houses: Query<&House>,
+    graves: Query<&Grave>,
+    voties: Query<&Voter>,
 ) {
-    if !world_stats.timer.tick(time.delta()).just_finished() {
+    if !world_stats
+        .timer
+        .tick(sim_time.delta(&time))
+        .just_finished()
+    {
         return;
     }
 
@@ -163,10 +195,41 @@ pub fn world_stats_update_system(
         .hole_filled_capacity
         .push(treasury.money / treasury.capacity);
 
+    // Housing states
+    let mut houses_capacity = 0;
+    let mut houses_occupants = 0;
+    for house in houses.iter() {
+        houses_capacity += house.dwellings;
+        houses_occupants += house.occupants_count();
+    }
+    world_stats
+        .houses_filled
+        .push(houses_occupants as f32 / houses_capacity as f32);
+
+    // Graves
+    let grave_cutoff = match sim_time.elapsed().checked_sub(Duration::from_secs(60)) {
+        Some(val) => val,
+        None => Duration::ZERO,
+    };
+    for death_reason in enum_iterator::all::<DeathReason>() {
+        // SLOW POINT
+        world_stats.deaths.update(
+            &death_reason,
+            graves
+                .iter()
+                .filter(|g| g.created > grave_cutoff && g.died_of == death_reason)
+                .count(),
+        );
+    }
+
+    // Buildings
     for building in enum_iterator::all::<building::BuildingStatus>() {
+        // SLOW POINT
         world_stats.buildings.update(
             &building,
             buildings.iter().filter(|b| **b == building).count(),
         );
     }
+
+    world_stats.population.push(voties.iter().count());
 }

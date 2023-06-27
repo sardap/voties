@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 use bevy_enum_filter::prelude::*;
 
@@ -7,6 +9,8 @@ use crate::{
     goals::{self, Goals},
     hunger::Stomach,
     reproduction::Reproductive,
+    shelter::RequiresHouse,
+    sim_time::SimTime,
 };
 
 #[derive(Debug, Component, Default)]
@@ -18,11 +22,11 @@ fn do_election_goal(
     elections: &Query<(Entity, &Election)>,
 ) -> bool {
     for (election_entity, election) in elections {
-        if election.voted.contains(&entity) {
+        if election.votes.contains_key(&entity) {
             continue;
         }
 
-        *goal = Goals::Vote(goals::Vote::new(election_entity));
+        *goal = Goals::Vote(goals::vote::Vote::new(election_entity));
         return true;
     }
 
@@ -30,7 +34,6 @@ fn do_election_goal(
 }
 
 pub fn decide_system(
-    time: Res<Time>,
     mut query: Query<
         (
             Entity,
@@ -38,12 +41,13 @@ pub fn decide_system(
             &Energy,
             Option<&Stomach>,
             Option<&Reproductive>,
+            Option<&RequiresHouse>,
         ),
         (With<Brain>, With<Enum!(goals::Goals::None)>),
     >,
     elections: Query<(Entity, &Election)>,
 ) {
-    for (entity, mut goal, energy, stomach, reproductive) in &mut query {
+    for (entity, mut goal, energy, stomach, reproductive, requires_house) in &mut query {
         if do_election_goal(&mut goal, entity, &elections) {
             continue;
         }
@@ -55,8 +59,15 @@ pub fn decide_system(
             }
         }
 
+        if let Some(requires_house) = requires_house {
+            if requires_house.homeless_for > Duration::ZERO {
+                *goal = Goals::FindHousing(default());
+                continue;
+            }
+        }
+
         if let Some(reproductive) = reproductive {
-            if energy.current_kcal >= 1500.0 && reproductive.next_reproduction < time.elapsed() {
+            if energy.current_kcal >= 1500.0 && reproductive.reproduction_timer.finished() {
                 *goal = Goals::Reproduce(default());
                 continue;
             }

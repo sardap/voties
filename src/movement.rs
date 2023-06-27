@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::sim_time::SimTime;
+
 #[derive(Component, Default)]
 pub struct Velocity {
     x: f32,
@@ -31,9 +33,13 @@ pub fn go_to_target(mut query: Query<(&MovementGoal, &MovementSpeed, &Transform,
     }
 }
 
-pub fn apply_velcoity_system(time: Res<Time>, mut query: Query<(&mut Transform, &Velocity)>) {
+pub fn apply_velcoity_system(
+    time: Res<Time>,
+    sim_time: Res<SimTime>,
+    mut query: Query<(&mut Transform, &Velocity)>,
+) {
     for (mut transform, vel) in &mut query {
-        transform.translation.x += (vel.x * time.delta_seconds()).min(50.0);
-        transform.translation.y += (vel.y * time.delta_seconds()).min(50.0);
+        transform.translation.x += (vel.x * sim_time.delta_seconds(&time)).min(50.0);
+        transform.translation.y += (vel.y * sim_time.delta_seconds(&time)).min(50.0);
     }
 }

@@ -4,12 +4,14 @@ use bevy::prelude::*;
 use bevy_enum_filter::prelude::*;
 
 use crate::{
-    assets, building,
+    assets,
+    buildings::building,
     money::{Money, Treasury},
+    sim_time::SimTime,
 };
 
-pub const MINT_MPS_MIN: Money = 200.0;
-pub const MINT_MPS_MAX: Money = 500.0;
+pub const MINT_MPS_MIN: Money = 500.0;
+pub const MINT_MPS_MAX: Money = 1000.0;
 
 #[derive(Component, Clone, Default)]
 pub struct Mint {
@@ -80,12 +82,18 @@ pub fn spawn(
 
 pub fn mint_produce_system(
     time: Res<Time>,
+    sim_time: Res<SimTime>,
     mut treasury: ResMut<Treasury>,
     mut query: Query<&mut Mint, Without<Enum!(building::BuildingStatus::Dilapidated)>>,
 ) {
     for mut mint in query.iter_mut() {
-        if mint.timer.tick(time.delta()).just_finished() {
-            // TODO here add plus money symbol
+        let finished_count = mint
+            .timer
+            .tick(sim_time.delta(&time))
+            .times_finished_this_tick();
+
+        for _ in 0..finished_count {
+            // TODO add plus text
             treasury.add(mint.money_per_cycle);
         }
     }

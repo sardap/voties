@@ -13,6 +13,18 @@ pub struct CollisionHolder {
     pub events: Vec<CollisionEvent>,
 }
 
+impl CollisionHolder {
+    pub fn colliding_with(&self, other: Entity) -> Option<CollisionEvent> {
+        for event in &self.events {
+            if event.other == other {
+                return Some(*event);
+            }
+        }
+
+        return None;
+    }
+}
+
 #[derive(Debug, Resource)]
 pub struct CollisionTimer(pub Timer);
 

@@ -1,7 +1,8 @@
+#![feature(const_fn_floating_point_arithmetic)]
+#![feature(generic_const_exprs)]
 extern crate measurements;
 use bevy::{
     app::App,
-    core_pipeline::clear_color::ClearColorConfig,
     diagnostic::FrameTimeDiagnosticsPlugin,
     prelude::*,
     time::{Timer, TimerMode},
@@ -10,33 +11,35 @@ use bevy::{
 };
 use bevy_common_assets::toml::TomlAssetPlugin;
 use bevy_enum_filter::prelude::*;
-use building::BuildingPlots;
+use buildings::building::BuildingPlots;
 use rand::Rng;
+use sets::{AppState, LifeSet};
 use world_stats::WorldStats;
 
 mod age;
 mod assets;
 mod brain;
-mod building;
+mod buildings;
 mod collision;
 mod death;
 mod elections;
 mod energy;
-mod farm;
 mod goals;
 mod grave;
 mod hunger;
 mod info;
-mod mint;
+mod input;
 mod money;
-mod money_hole;
 mod movement;
 mod name;
 mod people;
 mod player;
 mod reproduction;
 mod rng;
+mod sets;
+mod shelter;
 mod sim_setup;
+mod sim_time;
 mod stats;
 mod text;
 mod ui;
@@ -46,13 +49,6 @@ mod world_stats;
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let food_collection = FoodCollectionHandle(asset_server.load(assets::FOOD_CONFIG_FILE));
     commands.insert_resource(food_collection);
-
-    commands.spawn(Camera2dBundle {
-        camera_2d: Camera2d {
-            clear_color: ClearColorConfig::Custom(Color::WHITE),
-        },
-        ..default()
-    });
 }
 
 fn loading_world_assets(
@@ -71,11 +67,11 @@ fn main() {
     let seed: u64 = if cfg!(wasm32) {
         rand::thread_rng().gen()
     } else {
-        100
+        101
     };
 
     App::new()
-        .add_enum_filter::<building::BuildingStatus>()
+        .add_enum_filter::<buildings::building::BuildingStatus>()
         .add_enum_filter::<goals::Goals>()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
@@ -110,6 +106,9 @@ fn main() {
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_plugin(stats::StatsPlugin)
         .add_state::<AppState>()
+        .add_event::<elections::election::ElectionClosedEvent>()
+        .add_plugin(ui::VotiesUiPlugin)
+        .add_plugin(goals::GoalsPlugin)
         .add_startup_system(setup)
         .add_system(loading_world_assets.run_if(in_state(AppState::Loading)))
         .add_system(sim_setup::setting_up_world.run_if(in_state(AppState::SettingUpWorld)))
@@ -124,39 +123,40 @@ fn main() {
         .configure_set(PhysicsSet::Movement.run_if(in_state(AppState::Running)))
         .configure_set(PhysicsSet::CollisionDetection.run_if(in_state(AppState::Running)))
         .add_systems((
-            ui::election::update_election_status_system.in_set(UiSet::Normal),
-            ui::button::button_color_system.in_set(UiSet::Normal),
-            ui::resources::building_button_system.in_set(UiSet::Normal),
-            ui::money::update_election_status_system.in_set(UiSet::Normal),
-        ))
-        .add_systems((
             hunger::drain_stomach_system.in_set(LifeSet::World),
             energy::drain_energy_system.in_set(LifeSet::World),
             brain::decide_system.in_set(LifeSet::Decide),
             people::update_info_text.in_set(LifeSet::World),
-            goals::step_hunger_goal_system.in_set(LifeSet::Goal),
-            goals::step_reproduce_goal_system.in_set(LifeSet::Goal),
-            goals::step_wander_goal_system.in_set(LifeSet::Goal),
             age::age_up_system.in_set(LifeSet::World),
-            farm::farms_make_food_system.in_set(LifeSet::World),
+            buildings::farm::farms_make_food_system.in_set(LifeSet::World),
             people::give_birth_system.in_set(LifeSet::World),
             death::death_from_exhaustion_system.in_set(LifeSet::Mortal),
             death::die_of_old_age_system.in_set(LifeSet::Mortal),
             elections::election::start_election_system.in_set(LifeSet::World),
-            goals::vote_goal_system.in_set(LifeSet::Goal),
             elections::election::close_elections_system.in_set(LifeSet::World),
         ))
         .add_systems((
-            farm::update_farm_tint_system.in_set(LifeSet::World),
-            mint::mints_have_become_dilapidated_system.in_set(LifeSet::World),
-            mint::mint_produce_system.in_set(LifeSet::World),
+            buildings::building::update_building_tint_system.in_set(LifeSet::World),
+            buildings::mint::mints_have_become_dilapidated_system.in_set(LifeSet::World),
+            buildings::mint::mint_produce_system.in_set(LifeSet::World),
             upkeep::upkeep_cost_system.in_set(LifeSet::World),
-            building::change_building_status_system.in_set(LifeSet::World),
-            money_hole::update_treasury_capacity_system.in_set(LifeSet::World),
+            buildings::building::change_building_status_system.in_set(LifeSet::World),
+            buildings::money_hole::update_treasury_capacity_system.in_set(LifeSet::World),
             world_stats::world_stats_update_system.in_set(LifeSet::World),
+            buildings::house::update_house_text_system.in_set(LifeSet::World),
+            shelter::tick_homeless_system.in_set(LifeSet::World),
+            death::die_of_homelessness_system.in_set(LifeSet::Mortal),
+            buildings::house::clear_dead_from_house_system.in_set(LifeSet::World),
+            buildings::house::empty_dilapidated_house_system.in_set(LifeSet::World),
+            reproduction::reproductive_timer_tick_system.in_set(LifeSet::World),
+            sim_time::tick_sim_time_system.in_set(LifeSet::World),
+        ))
+        .add_systems((
+            input::player_input_camera_system.run_if(in_state(AppState::Running)),
+            input::player_input_sim_time_system.run_if(in_state(AppState::Running)),
         ))
         .add_systems(
-            (people::create_grave_system, death::remove_dead_system)
+            (grave::create_grave_system, death::remove_dead_system)
                 .chain()
                 .in_set(LifeSet::MortalResponse),
         )
@@ -169,31 +169,7 @@ fn main() {
         .configure_set(LifeSet::Goal.run_if(in_state(AppState::Running)))
         .configure_set(LifeSet::Mortal.run_if(in_state(AppState::Running)))
         .configure_set(LifeSet::MortalResponse.run_if(in_state(AppState::Running)))
-        .configure_set(UiSet::Normal.run_if(in_state(AppState::Running)))
         .run();
-}
-
-#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
-pub enum AppState {
-    #[default]
-    Loading,
-    SettingUpWorld,
-    SettingUpUi,
-    Running,
-}
-
-#[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
-enum LifeSet {
-    World,
-    Decide,
-    Goal,
-    Mortal,
-    MortalResponse,
-}
-
-#[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
-enum UiSet {
-    Normal,
 }
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]

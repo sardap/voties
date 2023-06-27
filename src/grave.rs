@@ -1,43 +1,36 @@
 use bevy::prelude::*;
 
-use crate::assets;
+use crate::{
+    age::Age,
+    death::{DeathReason, Mortal},
+    name,
+    sim_time::SimTime,
+};
 
 #[derive(Component, Clone)]
 pub struct Grave {
     pub created: std::time::Duration,
     pub name: String,
-    pub died_of: String,
+    pub died_of: DeathReason,
     pub age: std::time::Duration,
 }
 
-#[derive(Bundle, Clone)]
-pub struct GraveBundle {
-    grave: Grave,
-    #[bundle]
-    sprite: SpriteBundle,
-}
+pub fn create_grave_system(
+    mut commands: Commands,
+    sim_time: ResMut<SimTime>,
+    query: Query<(&Mortal, &name::Name, &Age)>,
+) {
+    for (mortal, name, age) in &query {
+        let death_reason = match mortal.dead {
+            Some(reason) => reason,
+            None => continue,
+        };
 
-impl GraveBundle {
-    pub fn new(
-        asset_server: &Res<AssetServer>,
-        source_position: &Transform,
-        time: &Res<Time>,
-        name: &str,
-        died_of: &str,
-        age: std::time::Duration,
-    ) -> Self {
-        Self {
-            grave: Grave {
-                created: time.elapsed(),
-                name: name.to_string(),
-                died_of: died_of.to_string(),
-                age,
-            },
-            sprite: SpriteBundle {
-                texture: asset_server.load(assets::DEFAULT_GRAVE_SPRITE_PATH),
-                transform: source_position.clone(),
-                ..default()
-            },
-        }
+        commands.spawn(Grave {
+            created: sim_time.elapsed(),
+            name: name.0.clone(),
+            died_of: death_reason,
+            age: age.duration_alive,
+        });
     }
 }
